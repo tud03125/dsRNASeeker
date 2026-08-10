@@ -20,12 +20,21 @@ def finalize_condition(outdir, pairs, txmap_path, tag, condition, args):
     # if TE_name appears more than once in txmap.
     meta = pairs.copy().reset_index(drop=True)
 
+    # DSRNASEEKER_EXPLICIT_ARM_ID_FIX_V2
+    # Preserve the exact identifiers used to construct pair_id.  Downstream
+    # summary code should not need to reverse-engineer arm IDs from a
+    # delimiter-containing display string.
+    if "A_TE_id" not in meta.columns:
+        meta["A_TE_id"] = meta["A_name"].astype(str)
+    if "B_TE_id" not in meta.columns:
+        meta["B_TE_id"] = meta["B_name"].astype(str)
+
     if 'genomic_orientation' not in meta.columns:
         meta['genomic_orientation'] = (meta['A_strand'].astype(str) != meta['B_strand'].astype(str)).map({True:'inverted',False:'direct'})
 
     if 'transcript_orientation' not in meta.columns:
         meta['transcript_orientation'] = meta['genomic_orientation']
-    X=strand.merge(mfe, on='pair_id', how='left').merge(meta[['pair_id','A_repFamily','A_repName','B_repFamily','B_repName','A_SYMBOL','B_SYMBOL','A_annotation','B_annotation','genomic_orientation','transcript_orientation']], on='pair_id', how='left').merge(AtoI, on='pair_id', how='left').merge(REDI, on='pair_id', how='left')
+    X=strand.merge(mfe, on='pair_id', how='left').merge(meta[['pair_id','A_TE_id','B_TE_id','A_repFamily','A_repName','B_repFamily','B_repName','A_SYMBOL','B_SYMBOL','A_annotation','B_annotation','genomic_orientation','transcript_orientation']], on='pair_id', how='left').merge(AtoI, on='pair_id', how='left').merge(REDI, on='pair_id', how='left')
     for opt in ['nullZ','interface_bpp','IntaRNA']:
         p=outdir/f'duplex_pairs.{tag}.{condition}.{opt}.tsv'
         if p.exists(): X=X.merge(pd.read_csv(p, sep='\t'), on='pair_id', how='left')
@@ -74,7 +83,7 @@ def finalize_condition(outdir, pairs, txmap_path, tag, condition, args):
     bias_avg=X.get(f'{condition}_fwd_frac', pd.Series(np.nan,index=X.index)).apply(bias)
     X['bias_penalty']=pd.Series(bias_avg).clip(0,0.5).fillna(0)*2
     X['rank_score']=X['expr_points']+X['energy_points']+X['editing_points']-X['bias_penalty']
-    cols_order=['pair_id','A_SYMBOL','B_SYMBOL','A_annotation','B_annotation','A_repFamily','A_repName','B_repFamily','B_repName','genomic_orientation','transcript_orientation','RNAcofold_MFE_kcalmol','MFE_norm_kcalpermkb','RNAfold_A_MFE_kcalmol','RNAfold_B_MFE_kcalmol','ddG_interaction_kcalmol','ddG_norm_kcalpermkb','ddG_Z','interface_bpp_sum','interface_bpp_max','interface_bpp_n','cofold_energy_bin',f'{condition}_total',f'{condition}_fwd_frac',f'{condition}_both_strands',f'{condition}_arm_opposite',f'{condition}_arms_both_cov','AtoI_hits_window','REDI_hits_window','bias_penalty','expr_points','energy_points','editing_points','rank_score','dsRNA_confidence']
+    cols_order=['pair_id','A_TE_id','B_TE_id','A_SYMBOL','B_SYMBOL','A_annotation','B_annotation','A_repFamily','A_repName','B_repFamily','B_repName','genomic_orientation','transcript_orientation','RNAcofold_MFE_kcalmol','MFE_norm_kcalpermkb','RNAfold_A_MFE_kcalmol','RNAfold_B_MFE_kcalmol','ddG_interaction_kcalmol','ddG_norm_kcalpermkb','ddG_Z','ddG_mu_null','ddG_sd_null','null_n_requested','null_n_effective','null_shuffle_exact_dinuc','null_shuffle_method','interface_bpp_sum','interface_bpp_max','interface_bpp_n','interface_bpp_n_ge_1e5','interface_bpp_expected_fraction_shorter','interface_bpp_mean_arm_fraction','cofold_energy_bin',f'{condition}_total',f'{condition}_fwd_frac',f'{condition}_both_strands',f'{condition}_arm_opposite',f'{condition}_arms_both_cov','AtoI_hits_window','REDI_hits_window','bias_penalty','expr_points','energy_points','editing_points','rank_score','dsRNA_confidence']
     for cand in ['E','E_total','Eall','E_hybrid','E_init','E_open','seedStart1','seedEnd1','seedStart2','seedEnd2']:
         if cand in X.columns and cand not in cols_order: cols_order.append(cand)
     for c in cols_order:

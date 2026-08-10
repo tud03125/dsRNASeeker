@@ -34,7 +34,11 @@ def run_te_analysis(args, bam_samplesheet: str | Path, te_outdir: str | Path) ->
     """
     te_outdir = ensure_dir(te_outdir)
     annot_dir = ensure_dir(te_outdir / "annotation")
-    final_csv = annot_dir / f"TE_expression_annotation_{args.control_label}_vs_{args.case_label}_all_sig.dsRNASeeker.csv"
+    candidate_mode = str(getattr(args, "te_candidate_mode", "strict")).lower()
+    if candidate_mode == "expressed":
+        final_csv = annot_dir / f"TE_expression_annotation_{args.control_label}_vs_{args.case_label}_expressed_candidates.dsRNASeeker.csv"
+    else:
+        final_csv = annot_dir / f"TE_expression_annotation_{args.control_label}_vs_{args.case_label}_all_sig.dsRNASeeker.csv"
 
     if is_nonempty_file(final_csv) and not getattr(args, "force", False):
         step(f"Step 2/6 TE analysis: reusing {final_csv}")
@@ -108,6 +112,10 @@ def run_te_analysis_atena_chipseeker(args, bam_samplesheet: str | Path, te_outdi
         "--alpha", str(getattr(args, "te_padj_max", 0.10)),
         "--lfc-threshold", str(getattr(args, "te_lfc_min", 1.0)),
         "--shrink-type", str(getattr(args, "te_shrink_type", "ashr")),
+        "--candidate-mode", str(getattr(args, "te_candidate_mode", "strict")),
+        "--candidate-min-mean", str(getattr(args, "te_candidate_min_mean", 10.0)),
+        "--candidate-padj-max", str(getattr(args, "te_candidate_padj_max", 1.0)),
+        "--candidate-lfc-threshold", str(getattr(args, "te_candidate_lfc_min", 0.0)),
     ]
 
     if getattr(args, "te_rmsk_rds", None):

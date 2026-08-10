@@ -1,6 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
-import re, random, subprocess
+import re, random, subprocess, hashlib
+from collections import Counter, defaultdict
 import numpy as np
 import pandas as pd
 from .utils import run_cmd
@@ -61,35 +62,55 @@ def _write_tsv_atomic(df, out):
     tmp.replace(out)
 
 
+
 def prepare_duplex_inputs(bedtools_exe, fasta, pairs, kept_pair_ids, outdir, tag, condition):
+    """
+    Extract the two TE arms in a common genomic orientation.
+
+    A_strand/B_strand describe RepeatMasker insertion orientation. They are
+    appropriate for deciding whether a pair is inverted, but must not be used
+    to reverse-complement the two arms independently for duplex thermodynamics.
+    """
     outdir = Path(outdir)
     pairs = pairs[pairs['pair_id'].isin(kept_pair_ids)]
-    rows=[]
+    rows = []
     for _, r in pairs.iterrows():
-        rows.append([r['A_chrom'],r['A_start'],r['A_end'],f"{r['pair_id']}|A",0,r['A_strand']])
-        rows.append([r['B_chrom'],r['B_start'],r['B_end'],f"{r['pair_id']}|B",0,r['B_strand']])
-    bed = outdir/f'duplex_arms.{tag}.{condition}.bed'
-    pd.DataFrame(rows, columns=['chrom','start','end','name','score','strand']).to_csv(bed, sep='\t', header=False, index=False)
+        rows.append([r['A_chrom'], r['A_start'], r['A_end'], f"{r['pair_id']}|A"])
+        rows.append([r['B_chrom'], r['B_start'], r['B_end'], f"{r['pair_id']}|B"])
+
+    bed = outdir / f'duplex_arms.{tag}.{condition}.bed'
+    pd.DataFrame(rows, columns=['chrom','start','end','name']).to_csv(
+        bed, sep='\t', header=False, index=False
+    )
     cp = run_cmd(
-        [bedtools_exe, 'getfasta', '-fi', str(fasta), '-bed', str(bed), '-s', '-name'],
+        [bedtools_exe, 'getfasta', '-fi', str(fasta), '-bed', str(bed), '-name'],
         capture=True,
         cwd=str(outdir),
     )
-    fa = outdir/f'duplex_arms.{tag}.{condition}.fa'; fa.write_text(cp.stdout)
-    clean = outdir/f'duplex_arms.{tag}.{condition}.clean.fa'
+    fa = outdir / f'duplex_arms.{tag}.{condition}.fa'
+    fa.write_text(cp.stdout)
+
+    clean = outdir / f'duplex_arms.{tag}.{condition}.clean.fa'
     with clean.open('w') as fo, fa.open() as fi:
         for line in fi:
             if line.startswith('>'):
-                h=line[1:].strip().split()[0].split('::',1)[0]
-                h=re.sub(r'\([+-]\)$','',h)
-                if '|' not in h: continue
-                pair, arm = h.split('|',1); arm=arm[:1]
-                if arm not in ('A','B'): continue
+                h = line[1:].strip().split()[0].split('::', 1)[0]
+                if '|' not in h:
+                    continue
+                pair, arm = h.split('|', 1)
+                arm = arm[:1]
+                if arm not in ('A', 'B'):
+                    continue
                 fo.write(f'>{pair}|{arm}\n')
             else:
-                fo.write(line.upper().replace('T','U'))
-    return clean
+                fo.write(line.upper().replace('T', 'U'))
 
+    provenance = outdir / f'duplex_arms.{tag}.{condition}.sequence_orientation.txt'
+    provenance.write_text(
+        "sequence_orientation=common_reference_plus\n"
+        "repeatmasker_strands_used_for_pair_orientation_not_independent_sequence_reverse_complement\n"
+    )
+    return clean
 
 def _load_pairs_from_clean_fasta(clean_fa):
     fa = Path(clean_fa).read_text().splitlines()
@@ -205,92 +226,211 @@ def run_ddg(args, clean_fa, cofold_tsv, outdir, tag, condition):
     return out
 
 
+
 def run_interface_bpp(clean_fa, outdir, tag, condition):
+    """
+    Summarize predicted cross-arm base-pair probabilities for the isolated A+B
+    cofold model. This is not an in-vivo encounter probability.
+    """
     import RNA
-    outdir=Path(outdir)
+    outdir = Path(outdir)
     expected_n = _expected_complete_pair_count(clean_fa)
-    out=outdir/f'duplex_pairs.{tag}.{condition}.interface_bpp.tsv'
-    required_cols = ['pair_id','interface_bpp_sum','interface_bpp_max','interface_bpp_n']
+    out = outdir / f'duplex_pairs.{tag}.{condition}.interface_bpp.tsv'
+    required_cols = [
+        'pair_id', 'interface_bpp_sum', 'interface_bpp_max', 'interface_bpp_n',
+        'interface_bpp_n_ge_1e5',
+        'interface_bpp_expected_fraction_shorter',
+        'interface_bpp_mean_arm_fraction',
+    ]
     if _valid_tsv(out, required_cols=required_cols, min_rows=expected_n):
         print(f"[SKIP] Existing valid ViennaRNA interface BPP file found: {out}")
         return out
 
-    pairs=_load_pairs_from_clean_fasta(clean_fa); rows=[]
-    for pid,ab in pairs.items():
-        if 'A' not in ab or 'B' not in ab: continue
-        A=ab['A']; B=ab['B'];
-        if not A or not B: continue
-        seq=A+'&'+B; lenA=len(A); n=lenA+len(B)
-        fc=RNA.fold_compound(seq); fc.pf(); bppm=fc.bpp(); one_based=(len(bppm)==n+1)
-        def get_p(i,j): return float(bppm[i][j]) if one_based else float(bppm[i-1][j-1])
+    pairs = _load_pairs_from_clean_fasta(clean_fa)
+    rows = []
+    for pid, ab in pairs.items():
+        if 'A' not in ab or 'B' not in ab:
+            continue
+        A, B = ab['A'], ab['B']
+        if not A or not B:
+            continue
 
-        # Do not store all probabilities in a Python list. Accumulate directly.
-        # This preserves the same output columns while reducing memory overhead.
-        p_sum=0.0; max_p=0.0; p_n=0
-        for i in range(1,lenA+1):
-            for j in range(lenA+1,n+1):
-                p=get_p(i,j)
-                if p>0:
+        seq = A + '&' + B
+        lenA, lenB = len(A), len(B)
+        n = lenA + lenB
+        fc = RNA.fold_compound(seq)
+        if hasattr(fc, "pf_dimer"):
+            fc.pf_dimer()
+        else:
+            fc.pf()
+        bppm = fc.bpp()
+        one_based = (len(bppm) == n + 1)
+
+        def get_p(i, j):
+            return float(bppm[i][j]) if one_based else float(bppm[i-1][j-1])
+
+        p_sum = 0.0
+        max_p = 0.0
+        p_n = 0
+        p_n_ge_1e5 = 0
+        for i in range(1, lenA + 1):
+            for j in range(lenA + 1, n + 1):
+                p = get_p(i, j)
+                if p > 0:
                     p_sum += p
                     p_n += 1
-                    if p > max_p:
-                        max_p = p
-        rows.append({'pair_id':pid,'interface_bpp_sum':float(p_sum),'interface_bpp_max':float(max_p),'interface_bpp_n':int(p_n)})
+                    if p >= 1e-5:
+                        p_n_ge_1e5 += 1
+                    max_p = max(max_p, p)
+
+        shorter = float(min(lenA, lenB))
+        expected_fraction_shorter = p_sum / shorter if shorter > 0 else np.nan
+        mean_arm_fraction = (
+            0.5 * ((p_sum / float(lenA)) + (p_sum / float(lenB)))
+            if lenA > 0 and lenB > 0 else np.nan
+        )
+
+        rows.append({
+            'pair_id': pid,
+            'interface_bpp_sum': float(p_sum),
+            'interface_bpp_max': float(max_p),
+            'interface_bpp_n': int(p_n),
+            'interface_bpp_n_ge_1e5': int(p_n_ge_1e5),
+            'interface_bpp_expected_fraction_shorter': float(expected_fraction_shorter),
+            'interface_bpp_mean_arm_fraction': float(mean_arm_fraction),
+        })
+
     _write_tsv_atomic(pd.DataFrame(rows), out)
     return out
 
 
+def _dinuc_counts(seq: str) -> Counter:
+    """Return exact adjacent dinucleotide counts for an RNA/DNA sequence."""
+    return Counter(zip(seq[:-1], seq[1:]))
+
+
+def _dinuc_shuffle_exact(seq: str, rng: random.Random) -> str:
+    """
+    Randomize a sequence while preserving its exact dinucleotide multiset.
+
+    The sequence is represented as a directed multigraph of adjacent bases and
+    an Eulerian trail is generated after randomizing outgoing edge order.  The
+    resulting permutation is verified before it is returned.
+    """
+    if len(seq) < 2:
+        return seq
+    edges = defaultdict(list)
+    for a, b in zip(seq[:-1], seq[1:]):
+        edges[a].append(b)
+    for key in list(edges):
+        rng.shuffle(edges[key])
+
+    stack = [seq[0]]
+    path = []
+    while stack:
+        vertex = stack[-1]
+        if edges[vertex]:
+            stack.append(edges[vertex].pop())
+        else:
+            path.append(stack.pop())
+    shuffled = ''.join(reversed(path))
+    if len(shuffled) != len(seq) or _dinuc_counts(shuffled) != _dinuc_counts(seq):
+        raise RuntimeError("Exact dinucleotide shuffle invariant failed")
+    return shuffled
+
+
 def run_null_z(args, clean_fa, ddg_tsv, outdir, tag, condition):
-    outdir=Path(outdir)
+    """
+    Exact dinucleotide-preserving null for ddG. Shuffled monomer MFEs are
+    recomputed for every null sequence before ddG is calculated.
+    """
+    outdir = Path(outdir)
     expected_n = _expected_complete_pair_count(clean_fa)
-    out=outdir/f'duplex_pairs.{tag}.{condition}.nullZ.tsv'
-    required_cols = ['pair_id','ddG_mu_null','ddG_sd_null','ddG_Z']
+    out = outdir / f'duplex_pairs.{tag}.{condition}.nullZ.tsv'
+    required_cols = [
+        'pair_id','ddG_mu_null','ddG_sd_null','ddG_Z',
+        'null_n_requested','null_n_effective','null_shuffle_exact_dinuc','null_shuffle_method'
+    ]
     if _valid_tsv(out, required_cols=required_cols, min_rows=expected_n):
         print(f"[SKIP] Existing valid null-Z file found: {out}")
         return out
 
-    pairs=_load_pairs_from_clean_fasta(clean_fa); obs=pd.read_csv(ddg_tsv, sep='\t')
-    random.seed(int(args.null_seed))
-    def dinuc_shuffle(seq):
-        from collections import defaultdict
-        edges=defaultdict(list)
-        for a,b in zip(seq[:-1],seq[1:]): edges[a].append(b)
-        for k in edges: random.shuffle(edges[k])
-        s=seq[0]; out=[s]; cur=s
-        for _ in range(len(seq)-1):
-            if not edges[cur]: cur=next((k for k,v in edges.items() if v), cur)
-            nxt=edges[cur].pop(); out.append(nxt); cur=nxt
-        return ''.join(out)
-    rows=[]
+    pairs = _load_pairs_from_clean_fasta(clean_fa)
+    obs = pd.read_csv(ddg_tsv, sep='\t')
+    def run_batch(exe, input_path):
+        with input_path.open("r") as fin:
+            proc = subprocess.run(
+                [exe, "--noPS"], stdin=fin, text=True, capture_output=True,
+                check=True, cwd=outdir
+            )
+        vals, cur = {}, None
+        lines = proc.stdout.splitlines()
+        for i, ln in enumerate(lines):
+            if ln.startswith('>'):
+                cur = ln[1:].strip()
+                continue
+            if cur:
+                m = re.search(r'\(\s*([-+]?\d+(?:\.\d+)?)\s*\)', ln)
+                if not m and i + 1 < len(lines):
+                    m = re.search(r'\(\s*([-+]?\d+(?:\.\d+)?)\s*\)', lines[i+1])
+                if m:
+                    vals[cur] = float(m.group(1))
+                    cur = None
+        return vals
+
+    rows = []
     for _, r in obs.iterrows():
-        pid=r['pair_id']; A=pairs.get(pid,{}).get('A',''); B=pairs.get(pid,{}).get('B','')
-        if not A or not B: continue
-        tmpin=outdir/f'.null_{pid}.in'
-        with tmpin.open('w') as fo:
-            for k in range(int(args.null_n)):
-                fo.write(f'>{pid}__null{k}\n{dinuc_shuffle(A)}&{dinuc_shuffle(B)}\n')
-        with tmpin.open("r") as fin:
-          proc = subprocess.run(
-              [args.rnacofold_exe, "--noPS"],
-              stdin=fin,
-              text=True,
-              capture_output=True,
-              check=True,
-              cwd=outdir,
-          )
-        mfes=[]; cur=None; lines=proc.stdout.splitlines()
-        for i,ln in enumerate(lines):
-            if ln.startswith('>'): cur=ln[1:].strip()
-            elif cur:
-                m = re.search(r'\(\s*([-+]?\d+(?:\.\d+)?)\s*\)', ln) or (re.search(r'\(\s*([-+]?\d+(?:\.\d+)?)\s*\)', lines[i+1]) if i+1 < len(lines) else None)
-                if m: mfes.append(float(m.group(1))); cur=None
-        ddg_null=np.array(mfes)-(float(r['RNAfold_A_MFE_kcalmol'])+float(r['RNAfold_B_MFE_kcalmol']))
-        mu=float(np.nanmean(ddg_null)); sd=float(np.nanstd(ddg_null, ddof=1)) if len(ddg_null)>1 else np.nan
-        z=(float(r['ddG_interaction_kcalmol'])-mu)/sd if sd and sd>0 else np.nan
-        rows.append({'pair_id':pid,'ddG_mu_null':mu,'ddG_sd_null':sd,'ddG_Z':z})
+        pid = str(r['pair_id'])
+        A = pairs.get(pid, {}).get('A', '')
+        B = pairs.get(pid, {}).get('B', '')
+        if not A or not B:
+            continue
+
+        nnull = int(args.null_n)
+        # Stable per-pair RNG makes the null reproducible even if candidate row
+        # order changes between runs.
+        seed_material = f"{int(args.null_seed)}::{pid}".encode('utf-8')
+        pair_seed = int.from_bytes(hashlib.sha256(seed_material).digest()[:8], 'big')
+        rng = random.Random(pair_seed)
+        shuffled = [(k, _dinuc_shuffle_exact(A, rng), _dinuc_shuffle_exact(B, rng)) for k in range(nnull)]
+        token = hashlib.md5(pid.encode('utf-8')).hexdigest()[:12]
+        co_in = outdir / f'.null_{token}.cofold.in'
+        a_in = outdir / f'.null_{token}.A.fold.in'
+        b_in = outdir / f'.null_{token}.B.fold.in'
+        with co_in.open('w') as fc, a_in.open('w') as fa, b_in.open('w') as fb:
+            for k, As, Bs in shuffled:
+                name = f'{token}__null{k}'
+                fc.write(f'>{name}\n{As}&{Bs}\n')
+                fa.write(f'>{name}\n{As}\n')
+                fb.write(f'>{name}\n{Bs}\n')
+
+        co = run_batch(args.rnacofold_exe, co_in)
+        am = run_batch(args.rnafold_exe, a_in)
+        bm = run_batch(args.rnafold_exe, b_in)
+
+        vals = []
+        for k, _, _ in shuffled:
+            name = f'{token}__null{k}'
+            if name in co and name in am and name in bm:
+                vals.append(co[name] - (am[name] + bm[name]))
+        arr = np.asarray(vals, dtype=float)
+        mu = float(np.nanmean(arr)) if len(arr) else np.nan
+        sd = float(np.nanstd(arr, ddof=1)) if len(arr) > 1 else np.nan
+        z = ((float(r['ddG_interaction_kcalmol']) - mu) / sd
+             if pd.notna(sd) and sd > 0 else np.nan)
+        rows.append({
+            'pair_id': pid, 'ddG_mu_null': mu, 'ddG_sd_null': sd, 'ddG_Z': z,
+            'null_n_requested': nnull, 'null_n_effective': int(len(arr)),
+            'null_shuffle_exact_dinuc': True, 'null_shuffle_method': 'randomized_eulerian_exact_dinucleotide',
+        })
+        for p in (co_in, a_in, b_in):
+            try:
+                p.unlink()
+            except FileNotFoundError:
+                pass
+
     _write_tsv_atomic(pd.DataFrame(rows), out)
     return out
-
 
 def run_intarna(args, clean_fa, outdir, tag, condition):
     outdir=Path(outdir)

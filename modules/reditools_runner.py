@@ -1,10 +1,57 @@
 from __future__ import annotations
 
 from pathlib import Path
+import os
+import shutil
+import socket
+import tempfile
 import pandas as pd
 import shlex
 
 from .utils import ensure_dir, run_cmd, is_nonempty_file, step
+
+
+def _scratch_root(args) -> Path:
+    """Use explicit or project-backed scratch; never silently default to /tmp."""
+    explicit = os.environ.get("DSRNASEEKER_SCRATCH")
+    use_node = os.environ.get("DSRNASEEKER_USE_NODE_SCRATCH", "0") == "1"
+
+    if explicit:
+        root = Path(explicit)
+    elif use_node and os.environ.get("SLURM_TMPDIR"):
+        root = Path(os.environ["SLURM_TMPDIR"])
+    else:
+        root = Path(args.output_dir) / "00_scratch"
+
+    root.mkdir(parents=True, exist_ok=True)
+    if not os.access(root, os.W_OK | os.X_OK):
+        raise PermissionError(f"Scratch directory is not writable: {root}")
+
+    min_free_gb = float(os.environ.get("DSRNASEEKER_MIN_SCRATCH_GB", "20"))
+    free_gb = shutil.disk_usage(root).free / (1024 ** 3)
+    if free_gb < min_free_gb:
+        raise OSError(
+            28,
+            f"Insufficient scratch space: {free_gb:.1f} GiB available at {root}; "
+            f"{min_free_gb:.1f} GiB required.",
+            str(root),
+        )
+    return root
+
+
+def _sample_scratch(args, stage: str, sid: str) -> Path:
+    safe_sid = "".join(c if c.isalnum() or c in "._-" else "_" for c in sid)
+    job = os.environ.get("SLURM_JOB_ID", "nojid")
+    host = socket.gethostname().split(".")[0]
+    prefix = f"dsRNASeeker_{stage}_{safe_sid}_{job}_{host}_{os.getpid()}_"
+    return Path(tempfile.mkdtemp(prefix=prefix, dir=str(_scratch_root(args))))
+
+
+def _move_replace(src: Path, dest: Path) -> None:
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    if dest.exists():
+        dest.unlink()
+    shutil.move(str(src), str(dest))
 
 
 def _all_filtered_exist(df: pd.DataFrame, outdir: Path) -> bool:
@@ -39,7 +86,20 @@ def run_reditools2(args, bam_samplesheet: str | Path, outdir: str | Path) -> Pat
         sample_summary = outdir / "qc" / f"{sid}_reditools2_summary.tsv"
         log = Path(args.output_dir) / "pipeline_info" / "logs" / f"REDItools2.{sid}.log"
 
-        if not is_nonempty_file(raw) or getattr(args, "force", False):
+        # If the final filtered file is missing, regenerate the raw file even if
+        # a previous nonempty raw file exists. REDItools2 can leave a nonempty but
+        # truncated raw table after OSError / filesystem failures.
+        need_raw = (
+            getattr(args, "force", False)
+            or not is_nonempty_file(raw)
+            or not is_nonempty_file(filt)
+        )
+
+        if need_raw:
+            if raw.exists():
+                raw.unlink()
+            sample_tmp = _sample_scratch(args, "REDItools2", sid)
+            raw_tmp = sample_tmp / f"{sid}_reditools2_raw.txt"
             # REDItools2 installations differ. This default matches the REDItools2
             # src/cineca/reditools.py convention used in your legacy scripts:
             #   reditools.py -f input.bam -r reference.fa -o output.txt -s <strand>
@@ -47,13 +107,17 @@ def run_reditools2(args, bam_samplesheet: str | Path, outdir: str | Path) -> Pat
                 args.reditools_exe,
                 "-f", bam,
                 "-r", str(args.fasta),
-                "-o", str(raw),
+                "-o", str(raw_tmp),
                 "-s", str(args.reditools_strand),
             ]
             if args.reditools_extra:
                 cmd += shlex.split(args.reditools_extra)
-            step(f"Step 4/6 RNA editing: running REDItools2 for {sid}")
+            step(f"Step 4/6 RNA editing: running REDItools2 for {sid} using scratch {sample_tmp}")
             run_cmd(cmd, log_path=log, quiet=getattr(args, "quiet", True))
+            if not is_nonempty_file(raw_tmp):
+                raise RuntimeError(f"REDItools2 did not produce a nonempty raw file for {sid}: {raw_tmp}")
+            _move_replace(raw_tmp, raw)
+            shutil.rmtree(sample_tmp, ignore_errors=True)
         else:
             step(f"Step 4/6 RNA editing: reusing REDItools2 raw output for {sid}")
 

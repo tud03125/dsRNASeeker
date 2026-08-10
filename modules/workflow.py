@@ -65,7 +65,10 @@ def _write_versions(args, outdir: Path) -> None:
 def _normalize_fastq_samplesheet(path: str | Path, outdir: Path) -> pd.DataFrame:
     p = Path(path)
     sep = "\t" if p.suffix.lower() in {".tsv", ".txt"} else ","
-    df = pd.read_csv(p, sep=sep)
+    # Optional FASTQ2 cells in single-end samplesheets must remain empty
+    # strings. pandas otherwise converts blank cells to NaN, which later becomes
+    # the literal path "nan" during FASTQ inference.
+    df = pd.read_csv(p, sep=sep, keep_default_na=False)
     required = {"sample_id", "condition"}
     missing = required - set(df.columns)
     if missing:
@@ -76,8 +79,17 @@ def _normalize_fastq_samplesheet(path: str | Path, outdir: Path) -> pd.DataFrame
         df["fastq_2"] = ""
     if "strandedness" not in df.columns:
         df["strandedness"] = "auto"
-    df["sample_id"] = df["sample_id"].astype(str)
-    df["condition"] = df["condition"].astype(str)
+
+    for col in ["sample_id", "condition", "fastq_1", "fastq_2", "bam_path", "strandedness"]:
+        if col in df.columns:
+            df[col] = df[col].fillna("").astype(str).str.strip()
+
+    # Be defensive against tables that were already parsed with default NA
+    # handling or contain textual missing-value sentinels.
+    if "fastq_2" in df.columns:
+        df["fastq_2"] = df["fastq_2"].replace(
+            {"nan": "", "NaN": "", "NA": "", "N/A": "", "None": "", "none": ""}
+        )
     return df
 
 
@@ -155,7 +167,9 @@ def run_workflow(args) -> None:
 
     # TE CSV contract. --skip-te-analysis means "do not regenerate"; use an
     # explicit precomputed CSV first, otherwise reuse the expected internal CSV.
-    expected_csv = outdir / "02_te" / "annotation" / f"TE_expression_annotation_{control}_vs_{case}_all_sig.dsRNASeeker.csv"
+    te_candidate_mode = str(getattr(args, "te_candidate_mode", "strict")).lower()
+    te_suffix = "expressed_candidates" if te_candidate_mode == "expressed" else "all_sig"
+    expected_csv = outdir / "02_te" / "annotation" / f"TE_expression_annotation_{control}_vs_{case}_{te_suffix}.dsRNASeeker.csv"
     if args.precomputed_csv_in:
         csv_in = Path(args.precomputed_csv_in)
         step(f"Step 2/6 TE analysis: using precomputed TE CSV {csv_in}")
@@ -212,16 +226,28 @@ def run_workflow(args) -> None:
         output_dir=str(outdir), case_label=case, control_label=control, csv_in=str(csv_in),
         analyze_subset=args.analyze_subset, rmats_dir=str(rmats_dir) if rmats_dir else None,
         rmats_track=args.rmats_track, rmats_fdr_max=args.rmats_fdr_max,
+        rmats_overlap_slop=args.rmats_overlap_slop,
+        rmats_interval_mode=args.rmats_interval_mode,
         rmats_group1_label=case, rmats_group2_label=control, rmats_flip_dpsi=False,
         bedtools_exe=args.bedtools_exe, priority_top_n=args.priority_top_n,
         priority_mode=args.priority_mode, require_case_editing=args.require_case_editing,
         require_case_ri=args.require_case_ri, priority_score_mode=args.priority_score_mode,
+        annotation_policy=args.annotation_policy,
         training_truth_table=args.training_truth_table, training_labels=args.training_labels,
         truth_symbol_col=args.truth_symbol_col, truth_label_mode=args.truth_label_mode,
         truth_label_col=args.truth_label_col, truth_padj_col=args.truth_padj_col,
         truth_logfc_col=args.truth_logfc_col, truth_padj_max=args.truth_padj_max,
         supervised_test_size=args.supervised_test_size, cv_folds=args.cv_folds,
         supervised_random_state=args.supervised_random_state,
+        supervised_model=args.supervised_model,
+        supervised_feature_panel=args.supervised_feature_panel,
+        supervised_tune=args.supervised_tune,
+        supervised_inner_cv_folds=args.supervised_inner_cv_folds,
+        supervised_selection_metric=args.supervised_selection_metric,
+        supervised_c=args.supervised_c,
+        supervised_l1_ratio=args.supervised_l1_ratio,
+        supervised_c_grid=args.supervised_c_grid,
+        supervised_l1_ratio_grid=args.supervised_l1_ratio_grid,
     ))
 
     step("Step 6/6 summary/delta/Z-RNA: building delta table")

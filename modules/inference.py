@@ -18,6 +18,16 @@ def _open_text(path: str | Path):
     return gzip.open(p, "rt") if p.endswith((".gz", ".gzip")) else open(p, "rt")
 
 
+def _optional_path(value) -> str:
+    """Normalize an optional path cell without turning pandas NA into 'nan'."""
+    if value is None or pd.isna(value):
+        return ""
+    text = str(value).strip()
+    if text.lower() in {"", "nan", "na", "n/a", "none", "null"}:
+        return ""
+    return text
+
+
 def _fastq_lengths(path: str | Path, records: int = 10000) -> list[int]:
     lengths: list[int] = []
     with _open_text(path) as fh:
@@ -71,8 +81,10 @@ def infer_layout_and_read_length(args, samples: pd.DataFrame, info_dir: str | Pa
 
     if args.input_mode == "fastq":
         for row in samples.itertuples(index=False):
-            fq1 = str(row.fastq_1)
-            fq2 = str(getattr(row, "fastq_2", "") or "").strip()
+            fq1 = _optional_path(row.fastq_1)
+            fq2 = _optional_path(getattr(row, "fastq_2", ""))
+            if not fq1:
+                raise ValueError(f"Missing fastq_1 for sample {row.sample_id}")
             paired = bool(fq2)
             if not Path(fq1).exists():
                 raise FileNotFoundError(fq1)
