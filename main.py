@@ -7,7 +7,9 @@ from modules.summary import run_summary
 from modules.delta import run_delta
 from modules.runtime_check import check_runtime
 from modules.zrna import run_zrna
+from modules.molecule_model import run_molecule_model
 from modules.workflow import run_workflow
+from modules.supervised_benchmark import run_supervised_benchmark
 
 def add_execs(p: argparse.ArgumentParser) -> None:
     p.add_argument('--python-exe', default='python3')
@@ -60,6 +62,10 @@ def add_summary_args(p: argparse.ArgumentParser) -> None:
     p.add_argument('--rmats-dir', default=None)
     p.add_argument('--rmats-track', default='JCEC', choices=['JC','JCEC'])
     p.add_argument('--rmats-fdr-max', type=float, default=0.05)
+    p.add_argument('--rmats-overlap-slop', type=int, default=0,
+                   help='Pad TE-pair/arm intervals by this many bp when intersecting rMATS RI events. 0 preserves exact-overlap behavior.')
+    p.add_argument('--rmats-interval-mode', choices=['intron_body', 'event_span'], default='intron_body',
+                   help='For RI matching, use upstreamEE→downstreamES intron body when available, or full riExonStart_0base→riExonEnd event span.')
     p.add_argument('--rmats-group1-label', default=None)
     p.add_argument('--rmats-group2-label', default=None)
     p.add_argument('--rmats-flip-dpsi', action='store_true', default=False,
@@ -73,8 +79,10 @@ def add_summary_args(p: argparse.ArgumentParser) -> None:
                    help='Do not require case-enriched SPRINT/REDI editing for strict priority_gate_pass.')
     p.add_argument('--no-require-case-ri', dest='require_case_ri', action='store_false', default=True,
                    help='Do not require case-high rMATS RI for strict priority_gate_pass.')
-    p.add_argument('--priority-score-mode', choices=['expert', 'adaptive', 'supervised'], default='adaptive',
-                   help='adaptive uses ADPS; supervised trains a label-driven model from --training-truth-table or --training-labels.')
+    p.add_argument('--priority-score-mode', choices=['expert', 'adaptive', 'balanced', 'supervised'], default='adaptive',
+                   help='adaptive uses gate-derived ADPS weights; balanced uses equal weights across non-gate evidence blocks; supervised uses label-driven logistic ranking.')
+    p.add_argument('--annotation-policy', choices=['conservative', 'zrna_permissive'], default='conservative',
+                   help='zrna_permissive differs only by allowing known 3UTR-3UTR pairs; unknown annotations remain rejected.')
     p.add_argument('--training-truth-table', default=None,
                    help='Gene-level truth table used to derive pair labels by matching truth symbols to A_SYMBOL/B_SYMBOL.')
     p.add_argument('--training-labels', default=None,
@@ -99,6 +107,23 @@ def add_summary_args(p: argparse.ArgumentParser) -> None:
                    help='Number of stratified CV folds for supervised diagnostics. Use 0 to disable CV.')
     p.add_argument('--supervised-random-state', type=int, default=1,
                    help='Random seed for supervised train/test and cross-validation splits.')
+    p.add_argument('--supervised-model', choices=['legacy_l2','elasticnet'], default='legacy_l2',
+                   help='legacy_l2 is a fixed L2 comparator; elasticnet permits L2/L1/Elastic-Net selection, using LBFGS for l1_ratio=0 and SAGA otherwise.')
+    p.add_argument('--supervised-feature-panel',
+                   choices=['raw7','routes6','orientation_only','annotation_only','orientation_annotation','structure_only','condition_only','structure_condition','no_orientation_annotation','annotation_structure_condition','compact_v1','all_current','auto_prespecified'],
+                   default='raw7',
+                   help='Use raw7 evidence components, routes6 pre-specified composites, a backward-compatible panel, or select raw7 versus routes6 inside grouped training CV.')
+    p.add_argument('--supervised-tune', action='store_true', default=False,
+                   help='Tune regularization, and panel when auto_prespecified, using grouped CV within the training matrix only.')
+    p.add_argument('--no-supervised-tune', dest='supervised_tune', action='store_false')
+    p.add_argument('--supervised-inner-cv-folds', type=int, default=3)
+    p.add_argument('--supervised-selection-metric', choices=['average_precision','roc_auc','balanced_accuracy'], default='average_precision')
+    p.add_argument('--supervised-c', type=float, default=1.0,
+                   help='Fixed inverse regularization strength when --supervised-tune is not used.')
+    p.add_argument('--supervised-l1-ratio', type=float, default=0.5,
+                   help='Fixed elastic-net L1 ratio when --supervised-tune is not used.')
+    p.add_argument('--supervised-c-grid', default='0.03,0.3,3')
+    p.add_argument('--supervised-l1-ratio-grid', default='0,0.5,1')
 
 
 def add_delta_args(p: argparse.ArgumentParser) -> None:
@@ -120,6 +145,21 @@ def add_zrna_args(p: argparse.ArgumentParser) -> None:
     p.add_argument('--zrna-moderate-threshold', type=float, default=0.33)
     p.add_argument('--zrna-high-threshold', type=float, default=0.67)
 
+
+
+def add_molecule_model_args(p: argparse.ArgumentParser) -> None:
+    p.add_argument('--output-dir', required=True)
+    p.add_argument('--case-label', required=True)
+    p.add_argument('--control-label', required=True)
+    p.add_argument('--gtf', required=True)
+    p.add_argument('--analyze-subset', default='inverted', choices=['inverted','hairpin','allpairs'])
+    p.add_argument('--summary-in', default=None)
+    p.add_argument('--zrna-summary', default=None)
+    p.add_argument('--include-default-zrna', dest='include_default_zrna', action='store_true', default=True)
+    p.add_argument('--no-include-default-zrna', dest='include_default_zrna', action='store_false')
+    p.add_argument('--transcript-overlap-fraction', type=float, default=0.80)
+    p.add_argument('--transcript-containment-slop', type=int, default=0)
+    p.add_argument('--max-transcript-ids', type=int, default=20)
 
 def add_workflow_args(p: argparse.ArgumentParser) -> None:
     """End-to-end workflow interface: FASTQ/BAM -> alignment -> TE/RNA-editing/rMATS -> dsRNASeeker."""
@@ -201,6 +241,16 @@ def add_workflow_args(p: argparse.ArgumentParser) -> None:
     p.add_argument('--te-padj-max', type=float, default=0.10)
     p.add_argument('--te-lfc-min', type=float, default=1.0,
                    help='For advanced mode, mirrors your old |log2FC| > 1 significant TE threshold by default.')
+    p.add_argument('--te-candidate-mode', choices=['strict', 'expressed'], default='strict',
+                   help=('strict: dsRNASeeker pairs are built only from padj/|LFC|-significant TE loci. '
+                         'expressed: pairs are built from observed/expressed TE loci, while strict DE status '
+                         'is kept as evidence columns. Use expressed for RIP/dsRNA-seq validation datasets.'))
+    p.add_argument('--te-candidate-min-mean', type=float, default=10.0,
+                   help='For --te-candidate-mode expressed, minimum max(mean normalized count in case/control) for a TE locus to enter the pair universe.')
+    p.add_argument('--te-candidate-padj-max', type=float, default=1.0,
+                   help='For --te-candidate-mode expressed, optional padj cutoff for the candidate universe. 1.0 keeps all expressed tested rows regardless of padj.')
+    p.add_argument('--te-candidate-lfc-min', type=float, default=0.0,
+                   help='For --te-candidate-mode expressed, optional abs(log2FC) cutoff for the candidate universe. 0 keeps all expressed tested rows.')
     p.add_argument('--featurecounts-exe', default='featureCounts', help='Used only with --te-mode simple')
 
     # rMATS: internally b1=case and b2=control, so dPSI=case-control.
@@ -208,7 +258,19 @@ def add_workflow_args(p: argparse.ArgumentParser) -> None:
     p.add_argument('--rmats-exe', default='rmats.py')
     p.add_argument('--rmats-track', default='JCEC', choices=['JC','JCEC'])
     p.add_argument('--rmats-fdr-max', type=float, default=0.05)
+    p.add_argument('--rmats-overlap-slop', type=int, default=0,
+                   help='Pad TE-pair/arm intervals by this many bp when intersecting rMATS RI events. 0 preserves exact-overlap behavior.')
+    p.add_argument('--rmats-interval-mode', choices=['intron_body', 'event_span'], default='intron_body',
+                   help='For RI matching, use upstreamEE→downstreamES intron body when available, or full riExonStart_0base→riExonEnd event span.')
     p.add_argument('--rmats-cstat', type=float, default=0.0001)
+    p.add_argument('--rmats-min-intron-length', type=int, default=1,
+                   help=('Pass rMATS --mil. This only changes --novelSS event detection. '
+                         'Default: 1, the most permissive positive minimum intron length.'))
+    p.add_argument('--rmats-max-exon-length', default='auto', metavar='INT|auto',
+                   help=('Pass rMATS --mel (maximum EXON length, not intron length). '
+                         'Default: auto, which scans exon records in --gtf and uses the '
+                         'largest annotated exon length (never below the rMATS default 500). '
+                         'A positive integer may be supplied to override the automatic value.'))
     p.add_argument('--rmats-libtype', default=None, choices=[None, 'fr-unstranded','fr-firststrand','fr-secondstrand'])
     p.add_argument('--rmats-novel-ss', action='store_true', default=True)
     p.add_argument('--no-rmats-novel-ss', dest='rmats_novel_ss', action='store_false')
@@ -265,7 +327,8 @@ def add_workflow_args(p: argparse.ArgumentParser) -> None:
     p.add_argument('--priority-mode', choices=['strict','relaxed'], default='strict')
     p.add_argument('--no-require-case-editing', dest='require_case_editing', action='store_false', default=True)
     p.add_argument('--no-require-case-ri', dest='require_case_ri', action='store_false', default=True)
-    p.add_argument('--priority-score-mode', choices=['expert','adaptive','supervised'], default='adaptive')
+    p.add_argument('--priority-score-mode', choices=['expert','adaptive','balanced','supervised'], default='adaptive')
+    p.add_argument('--annotation-policy', choices=['conservative','zrna_permissive'], default='conservative')
     p.add_argument('--training-truth-table', default=None)
     p.add_argument('--training-labels', default=None)
     p.add_argument('--truth-symbol-col', default='Symbol')
@@ -277,6 +340,18 @@ def add_workflow_args(p: argparse.ArgumentParser) -> None:
     p.add_argument('--supervised-test-size', type=float, default=0.25)
     p.add_argument('--cv-folds', type=int, default=5)
     p.add_argument('--supervised-random-state', type=int, default=1)
+    p.add_argument('--supervised-model', choices=['legacy_l2','elasticnet'], default='legacy_l2')
+    p.add_argument('--supervised-feature-panel',
+                   choices=['raw7','routes6','orientation_only','annotation_only','orientation_annotation','structure_only','condition_only','structure_condition','no_orientation_annotation','annotation_structure_condition','compact_v1','all_current','auto_prespecified'],
+                   default='raw7')
+    p.add_argument('--supervised-tune', action='store_true', default=False)
+    p.add_argument('--no-supervised-tune', dest='supervised_tune', action='store_false')
+    p.add_argument('--supervised-inner-cv-folds', type=int, default=3)
+    p.add_argument('--supervised-selection-metric', choices=['average_precision','roc_auc','balanced_accuracy'], default='average_precision')
+    p.add_argument('--supervised-c', type=float, default=1.0)
+    p.add_argument('--supervised-l1-ratio', type=float, default=0.5)
+    p.add_argument('--supervised-c-grid', default='0.03,0.3,3')
+    p.add_argument('--supervised-l1-ratio-grid', default='0,0.5,1')
 
     # Z-RNA options
     p.add_argument('--zrna-score-mode', default='pc1', choices=['pc1','sequence_pc1','consensus'])
@@ -286,6 +361,23 @@ def add_workflow_args(p: argparse.ArgumentParser) -> None:
 
     p.add_argument('--star-exe', default='STAR')
     add_execs(p)
+
+def add_supervised_benchmark_args(p: argparse.ArgumentParser) -> None:
+    p.add_argument('--manifest', required=True,
+                   help='TSV/CSV with dataset_id, analysis_variant, study_family, audit_table, same_study_eligible, loso_representative, and loso_target.')
+    p.add_argument('--input-root', default='.',
+                   help='Base directory for relative audit_table paths in the manifest.')
+    p.add_argument('--output-dir', required=True)
+    p.add_argument('--outer-folds', type=int, default=5)
+    p.add_argument('--inner-folds', type=int, default=3)
+    p.add_argument('--selection-metric', choices=['average_precision','roc_auc','balanced_accuracy'], default='average_precision')
+    p.add_argument('--c-grid', default='0.03,0.3,3')
+    p.add_argument('--l1-ratio-grid', default='0,0.5,1')
+    p.add_argument('--same-study-min-positive', type=int, default=10)
+    p.add_argument('--same-study-min-negative', type=int, default=10)
+    p.add_argument('--bootstrap', type=int, default=2000)
+    p.add_argument('--seed', type=int, default=20260728)
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog='dsRNASeeker', description='Condition-agnostic TE-pair dsRNA discovery pipeline.')
@@ -304,16 +396,21 @@ def build_parser() -> argparse.ArgumentParser:
     add_run_args(checkp)
     zrnap = sub.add_parser('zrna', help='Annotate inverted TE-pair dsRNA candidates with A-form support and Z-RNA propensity.')
     add_zrna_args(zrnap)
+    moleculep = sub.add_parser('molecule-model', help='Annotate candidates with conservative intramolecular/intermolecular compatibility.')
+    add_molecule_model_args(moleculep)
+    supervisedp = sub.add_parser('supervised-benchmark', help='Run manifest-driven nested grouped and leave-one-study-family-out supervised evaluation.')
+    add_supervised_benchmark_args(supervisedp)
     return parser
 
 
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
-    if getattr(args, 'rmats_group1_label', None) is None:
-        args.rmats_group1_label = args.case_label
-    if getattr(args, 'rmats_group2_label', None) is None:
-        args.rmats_group2_label = args.control_label
+    if args.command != 'supervised-benchmark':
+        if getattr(args, 'rmats_group1_label', None) is None:
+            args.rmats_group1_label = args.case_label
+        if getattr(args, 'rmats_group2_label', None) is None:
+            args.rmats_group2_label = args.control_label
     if args.command == 'workflow':
         run_workflow(args)
     elif args.command == 'run':
@@ -324,6 +421,10 @@ def main() -> None:
         run_delta(args)
     elif args.command == 'zrna':
         run_zrna(args)
+    elif args.command == 'molecule-model':
+        run_molecule_model(args)
+    elif args.command == 'supervised-benchmark':
+        run_supervised_benchmark(args)
     elif args.command == 'check':
         for line in check_runtime(args):
             print(line)
