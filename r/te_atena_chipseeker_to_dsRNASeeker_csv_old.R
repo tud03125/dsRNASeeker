@@ -958,7 +958,6 @@ empty_peak_annotation <- function(te_ids, annotation_text=NA_character_) {
 # style. In particular, geneChr/geneStrand/geneId may be integer for one
 # annotation and character for another. Placeholder rows for unsupported custom
 # contigs must use the same stable schema before dplyr::bind_rows().
-# DSRNASEEKER_T2T_BIND_ROWS_TYPE_FIX_V2
 normalize_peak_annotation_types <- function(x) {
   if (is.null(x)) return(data.frame(stringsAsFactors=FALSE))
   x <- as.data.frame(x, stringsAsFactors=FALSE)
