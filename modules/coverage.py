@@ -136,17 +136,119 @@ def fuse_pair_level(outdir, tag, condition, bedfile):
 def arm_aware_summaries(args, pairs, kept_pair_ids, outdir, tag, condition):
     outdir = Path(outdir)
     PAD = int(args.arm_pad)
-    rows=[]
-    pairs = pairs[pairs['pair_id'].isin(kept_pair_ids)]
-    for _, r in pairs.iterrows():
-        rows.append([r['A_chrom'], max(0,int(r['A_start'])-PAD), int(r['A_end'])+PAD, f"{r['pair_id']}|A"])
-        rows.append([r['B_chrom'], max(0,int(r['B_start'])-PAD), int(r['B_end'])+PAD, f"{r['pair_id']}|B"])
-    arms_bed = outdir / f'pair_arms.{tag}.{condition}.bed'
-    pd.DataFrame(rows, columns=['chrom','start','end','name']).to_csv(arms_bed, sep='\t', header=False, index=False)
+
+    # Use the bigWig header as the authoritative coordinate system for the
+    # regions that multiBigwigSummary will query. This prevents padded arm
+    # intervals from extending beyond chromosome boundaries.
     cond_df = pd.read_csv(args.samplesheet, sep='\t')
     cond_df = cond_df[cond_df['condition'].astype(str) == str(condition)]
     fwd_list = [str(outdir/f"{sid}.fwd.bw") for sid in cond_df['sample_id'].astype(str)]
     rev_list = [str(outdir/f"{sid}.rev.bw") for sid in cond_df['sample_id'].astype(str)]
+
+    try:
+        import pyBigWig
+    except ImportError as e:
+        raise RuntimeError(
+            "pyBigWig is required for chromosome-boundary validation of "
+            "arm-aware bigWig summaries. It is normally installed with deepTools."
+        ) from e
+
+    bw_files = fwd_list + rev_list
+    if not bw_files:
+        raise ValueError(f"No bigWig files available for condition {condition}")
+
+    chrom_sizes = None
+    for bw_path in bw_files:
+        bw = pyBigWig.open(str(bw_path))
+        if bw is None:
+            raise RuntimeError(f"Could not open bigWig: {bw_path}")
+        try:
+            current = {str(k): int(v) for k, v in bw.chroms().items()}
+        finally:
+            bw.close()
+        if chrom_sizes is None:
+            chrom_sizes = current
+        else:
+            # All coverage tracks for a comparison should use the same genome.
+            common = set(chrom_sizes).intersection(current)
+            mismatched = [
+                c for c in common if int(chrom_sizes[c]) != int(current[c])
+            ]
+            if mismatched:
+                preview = ", ".join(
+                    f"{c}:{chrom_sizes[c]}!={current[c]}" for c in mismatched[:5]
+                )
+                raise ValueError(
+                    "BigWig chromosome-length mismatch across samples: " + preview
+                )
+            chrom_sizes = {c: chrom_sizes[c] for c in common}
+
+    if not chrom_sizes:
+        raise ValueError("No common chromosomes found across condition bigWigs")
+
+    rows = []
+    clipped_left = 0
+    clipped_right = 0
+    pairs = pairs[pairs['pair_id'].isin(kept_pair_ids)]
+
+    def add_arm(r, prefix, arm):
+        nonlocal clipped_left, clipped_right
+        chrom = str(r[f'{prefix}_chrom'])
+        start = int(r[f'{prefix}_start'])
+        end = int(r[f'{prefix}_end'])
+
+        if chrom not in chrom_sizes:
+            raise ValueError(
+                f"TE arm chromosome {chrom!r} is absent from one or more "
+                f"coverage bigWig headers for condition {condition}"
+            )
+
+        chrom_len = int(chrom_sizes[chrom])
+
+        # The unpadded TE itself must already be valid. If not, this is a
+        # reference/annotation mismatch and should not be silently clipped.
+        if start < 0 or end <= start or end > chrom_len:
+            raise ValueError(
+                f"Invalid unpadded TE arm coordinates for {r['pair_id']}|{arm}: "
+                f"{chrom}:{start}-{end}; chromosome length={chrom_len}"
+            )
+
+        padded_start = start - PAD
+        padded_end = end + PAD
+        if padded_start < 0:
+            clipped_left += 1
+            padded_start = 0
+        if padded_end > chrom_len:
+            clipped_right += 1
+            padded_end = chrom_len
+
+        if padded_end <= padded_start:
+            raise ValueError(
+                f"Invalid padded TE arm coordinates for {r['pair_id']}|{arm}: "
+                f"{chrom}:{padded_start}-{padded_end}"
+            )
+
+        rows.append([
+            chrom,
+            padded_start,
+            padded_end,
+            f"{r['pair_id']}|{arm}",
+        ])
+
+    for _, r in pairs.iterrows():
+        add_arm(r, 'A', 'A')
+        add_arm(r, 'B', 'B')
+
+    if clipped_left or clipped_right:
+        print(
+            f"[coverage] clipped arm-aware padding to chromosome bounds: "
+            f"left={clipped_left}, right={clipped_right}, pad={PAD}"
+        )
+
+    arms_bed = outdir / f'pair_arms.{tag}.{condition}.bed'
+    pd.DataFrame(rows, columns=['chrom','start','end','name']).to_csv(
+        arms_bed, sep='\t', header=False, index=False
+    )
     _run_multi(args.multibigwigsummary_exe, arms_bed, fwd_list, outdir/f'fwd.arms.{tag}.{condition}.npz', outdir/f'fwd.arms.{tag}.{condition}.tsv')
     _run_multi(args.multibigwigsummary_exe, arms_bed, rev_list, outdir/f'rev.arms.{tag}.{condition}.npz', outdir/f'rev.arms.{tag}.{condition}.tsv')
     fwd = pd.read_csv(outdir/f'fwd.arms.{tag}.{condition}.tsv', sep='\t', dtype=str)
