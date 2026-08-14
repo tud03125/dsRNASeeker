@@ -67,6 +67,23 @@ DEFAULT_DOMINANT_WEIGHT_THRESHOLD = 0.80
 DEFAULT_TIGHT_IQR = 0.10
 DEFAULT_WIDE_IQR = 0.25
 
+# Human-readable diagnostic cutoffs. These are operational interpretation
+# thresholds, not accuracy/calibration thresholds and were not fit to RIP labels.
+DEFAULT_MIN_REFERENCE_N = 25
+DEFAULT_MIN_BACKGROUND_N = 25
+DEFAULT_MIN_REFERENCE_FRACTION = 0.05
+DEFAULT_MAX_REFERENCE_FRACTION = 0.95
+
+# ADPS numerical-resolution cutoffs. A score is called COARSE when it has very
+# few distinct values, a very low unique-score fraction, or a very large tied
+# group. HIGH/MODERATE/COARSE describe ranking granularity only.
+DEFAULT_COARSE_UNIQUE_N = 20
+DEFAULT_MODERATE_UNIQUE_N = 100
+DEFAULT_COARSE_UNIQUE_FRACTION = 0.01
+DEFAULT_MODERATE_UNIQUE_FRACTION = 0.05
+DEFAULT_COARSE_LARGEST_TIE_FRACTION = 0.25
+DEFAULT_MODERATE_LARGEST_TIE_FRACTION = 0.10
+
 
 def _numeric(series: pd.Series) -> pd.Series:
     return pd.to_numeric(series, errors="coerce")
@@ -251,6 +268,120 @@ def _score_granularity(score: pd.Series) -> dict[str, float | int]:
     }
 
 
+def _adps_weight_status(
+    wdiag: dict[str, object],
+    *,
+    min_reference_n: int = DEFAULT_MIN_REFERENCE_N,
+    min_background_n: int = DEFAULT_MIN_BACKGROUND_N,
+    min_reference_fraction: float = DEFAULT_MIN_REFERENCE_FRACTION,
+    max_reference_fraction: float = DEFAULT_MAX_REFERENCE_FRACTION,
+) -> str:
+    """Return a descriptive ADPS provenance/support label.
+
+    This status is intentionally label-free. ADAPTIVE_SUPPORTED means only that
+    the non-uniform weight solution was estimated from non-trivial internal
+    reference and background groups. It does not mean experimentally validated.
+    """
+    mode = str(wdiag.get("adps_weighting_mode", ""))
+    if mode == "equal_weight_fallback":
+        return "EQUAL_WEIGHT_FALLBACK"
+    if mode == "single_component_dominated":
+        return "SINGLE_COMPONENT_DOMINATED"
+
+    ref_n = pd.to_numeric(
+        pd.Series([wdiag.get("adaptive_reference_n")]), errors="coerce"
+    ).iloc[0]
+    bg_n = pd.to_numeric(
+        pd.Series([wdiag.get("adaptive_background_n")]), errors="coerce"
+    ).iloc[0]
+    frac = pd.to_numeric(
+        pd.Series([wdiag.get("adaptive_reference_fraction")]), errors="coerce"
+    ).iloc[0]
+
+    supported = (
+        np.isfinite(ref_n) and ref_n >= int(min_reference_n) and
+        np.isfinite(bg_n) and bg_n >= int(min_background_n) and
+        np.isfinite(frac) and
+        float(min_reference_fraction) <= frac <= float(max_reference_fraction)
+    )
+    return "ADAPTIVE_SUPPORTED" if supported else "LIMITED_REFERENCE"
+
+
+def _adps_score_resolution(granularity: dict[str, float | int]) -> str:
+    """Classify ADPS score granularity; never interpret this as accuracy."""
+    n_unique = pd.to_numeric(
+        pd.Series([granularity.get("adps_unique_score_n")]), errors="coerce"
+    ).iloc[0]
+    unique_frac = pd.to_numeric(
+        pd.Series([granularity.get("adps_unique_score_fraction")]), errors="coerce"
+    ).iloc[0]
+    tie_frac = pd.to_numeric(
+        pd.Series([granularity.get("adps_largest_tie_fraction")]), errors="coerce"
+    ).iloc[0]
+
+    if (
+        not np.isfinite(n_unique) or n_unique < DEFAULT_COARSE_UNIQUE_N or
+        not np.isfinite(unique_frac) or unique_frac < DEFAULT_COARSE_UNIQUE_FRACTION or
+        (np.isfinite(tie_frac) and tie_frac >= DEFAULT_COARSE_LARGEST_TIE_FRACTION)
+    ):
+        return "COARSE"
+    if (
+        n_unique < DEFAULT_MODERATE_UNIQUE_N or
+        unique_frac < DEFAULT_MODERATE_UNIQUE_FRACTION or
+        (np.isfinite(tie_frac) and tie_frac >= DEFAULT_MODERATE_LARGEST_TIE_FRACTION)
+    ):
+        return "MODERATE"
+    return "HIGH"
+
+
+def _candidate_user_interpretation(
+    candidate: pd.DataFrame,
+    *,
+    adps_weight_status: str,
+    tight_iqr: float,
+    wide_iqr: float,
+) -> pd.Series:
+    """Return a non-probabilistic, user-facing candidate interpretation."""
+    iqr = pd.to_numeric(
+        candidate["broad_profile_percentile_iqr"], errors="coerce"
+    )
+    top10 = pd.to_numeric(
+        candidate["broad_profile_top10_count"], errors="coerce"
+    ).fillna(0)
+
+    # Strongest candidate-level statement we can make without labels: high rank
+    # under multiple broad views with tight dispersion. This remains meaningful
+    # even when ADPS used a fallback because it describes cross-profile stability.
+    robust = (top10 >= 3) & (iqr <= float(tight_iqr))
+    out = pd.Series("", index=candidate.index, dtype=object)
+    out.loc[robust] = "ROBUST_MULTI_PROFILE_PRIORITY"
+
+    remaining = ~robust
+    if adps_weight_status == "SINGLE_COMPONENT_DOMINATED":
+        out.loc[remaining] = "SINGLE_COMPONENT_DRIVEN"
+    elif adps_weight_status == "EQUAL_WEIGHT_FALLBACK":
+        out.loc[remaining] = "FALLBACK_RANKING"
+    elif adps_weight_status == "LIMITED_REFERENCE":
+        out.loc[remaining] = "LIMITED_REFERENCE_RANKING"
+    else:
+        wide = iqr > float(wide_iqr)
+        out.loc[remaining & wide] = "ADPS_SUPPORTED_PROFILE_SENSITIVE"
+        out.loc[remaining & ~wide] = "ADPS_SUPPORTED_GENERAL"
+    return out
+
+
+def _dataset_guidance_label(weight_status: str, score_resolution: str) -> str:
+    if weight_status == "EQUAL_WEIGHT_FALLBACK":
+        return "INSPECT_MULTIPLE_PROFILES_FALLBACK"
+    if weight_status == "SINGLE_COMPONENT_DOMINATED":
+        return "INSPECT_MULTIPLE_PROFILES_SINGLE_COMPONENT"
+    if weight_status == "LIMITED_REFERENCE":
+        return "INSPECT_MULTIPLE_PROFILES_LIMITED_REFERENCE"
+    if score_resolution == "COARSE":
+        return "ADPS_REFERENCE_SUPPORTED_BUT_COARSE"
+    return "ADPS_REFERENCE_SUPPORTED"
+
+
 def _pairwise_spearman(scores: pd.DataFrame) -> pd.DataFrame:
     corr = scores.corr(method="spearman", min_periods=3)
     rows = []
@@ -381,6 +512,23 @@ def add_ranking_robustness(
     ):
         candidate[key] = wdiag.get(key)
 
+    # Human-readable status fields. These preserve all numerical diagnostics and
+    # add plain-language labels; they are not probabilities or validation calls.
+    adps_weight_status = _adps_weight_status(wdiag)
+    granularity = _score_granularity(scores["integrated_adps"])
+    adps_score_resolution = _adps_score_resolution(granularity)
+    candidate["ADPS_WEIGHT_STATUS"] = adps_weight_status
+    candidate["ADPS_SCORE_RESOLUTION"] = adps_score_resolution
+    candidate["CANDIDATE_RANK_STABILITY"] = (
+        candidate["broad_profile_agreement_band"].astype(str).str.upper()
+    )
+    candidate["USER_INTERPRETATION"] = _candidate_user_interpretation(
+        candidate,
+        adps_weight_status=adps_weight_status,
+        tight_iqr=tight_iqr,
+        wide_iqr=wide_iqr,
+    )
+
     # Dataset-level summary.
     summary_row: dict[str, object] = {
         "candidate_n": int(len(df)),
@@ -394,7 +542,18 @@ def add_ranking_robustness(
         ) if len(candidate) else np.nan,
     }
     summary_row.update(wdiag)
-    summary_row.update(_score_granularity(scores["integrated_adps"]))
+    summary_row.update(granularity)
+    summary_row["ADPS_WEIGHT_STATUS"] = adps_weight_status
+    summary_row["ADPS_SCORE_RESOLUTION"] = adps_score_resolution
+    summary_row["DATASET_USER_GUIDANCE"] = _dataset_guidance_label(
+        adps_weight_status, adps_score_resolution
+    )
+    summary_row["robust_multi_profile_priority_fraction"] = float(
+        candidate["USER_INTERPRETATION"].eq("ROBUST_MULTI_PROFILE_PRIORITY").mean()
+    ) if len(candidate) else np.nan
+    summary_row["profile_sensitive_fraction"] = float(
+        candidate["CANDIDATE_RANK_STABILITY"].eq("WIDE").mean()
+    ) if len(candidate) else np.nan
 
     broad_corr = _pairwise_spearman(scores[broad])
     finite_corr = pd.to_numeric(broad_corr.get("spearman_rho"), errors="coerce").dropna()
@@ -449,6 +608,9 @@ def _guidance_markdown(
     uniq = r.get("adps_unique_score_n", np.nan)
     n = r.get("adps_scored_candidate_n", np.nan)
     corr = r.get("adps_to_other_broad_profiles_spearman_median", np.nan)
+    weight_status = str(r.get("ADPS_WEIGHT_STATUS", ""))
+    score_resolution = str(r.get("ADPS_SCORE_RESOLUTION", ""))
+    dataset_guidance = str(r.get("DATASET_USER_GUIDANCE", ""))
 
     def fmt(x, digits=3):
         try:
@@ -476,6 +638,15 @@ identify the evidence route with the highest true AP/ROC-AUC and do not estimate
 the probability that a candidate forms a duplex. They quantify **ranking
 stability and evidence-profile agreement** under pre-specified label-free views.
 
+## Quick-read status
+
+- **ADPS_WEIGHT_STATUS:** `{weight_status}`
+- **ADPS_SCORE_RESOLUTION:** `{score_resolution}`
+- **DATASET_USER_GUIDANCE:** `{dataset_guidance}`
+
+These labels summarize provenance and ranking granularity only. They are not
+experimental confidence classes and were not calibrated against RIP labels.
+
 ## ADPS provenance
 
 - weighting mode: **{mode}**
@@ -492,11 +663,14 @@ stability and evidence-profile agreement** under pre-specified label-free views.
 
 1. Treat ADPS as the pre-specified label-independent reference ranking, not as a
    calibrated probability.
-2. Inspect `broad_profile_top10_count`, `broad_profile_top25_count`,
+2. Start with the plain-language columns in the candidate table:
+   `CANDIDATE_RANK_STABILITY` and `USER_INTERPRETATION`.
+   `ROBUST_MULTI_PROFILE_PRIORITY` means the candidate is in the top 10% under
+   at least three broad evidence views with tight rank dispersion. It does **not**
+   mean experimentally confirmed dsRNA.
+3. For details, inspect `broad_profile_top10_count`,
    `broad_profile_percentile_median`, and `broad_profile_percentile_iqr`.
-   Candidates that remain high across several broad profiles are robust to the
-   evidence-weighting assumption.
-3. If a candidate is high in one profile but has a wide cross-profile rank
+   If a candidate is high in one profile but has a wide cross-profile rank
    spread, treat it as **profile-sensitive**. Inspect the component and route
    columns rather than assuming the ADPS route is correct.
 4. If the biological question was specified in advance (for example,
@@ -559,6 +733,48 @@ def write_ranking_robustness(
         "dominant_weight_threshold": dominant_weight_threshold,
         "tight_iqr": tight_iqr,
         "wide_iqr": wide_iqr,
+        "human_readable_status_cutoffs": {
+            "min_reference_n": DEFAULT_MIN_REFERENCE_N,
+            "min_background_n": DEFAULT_MIN_BACKGROUND_N,
+            "min_reference_fraction": DEFAULT_MIN_REFERENCE_FRACTION,
+            "max_reference_fraction": DEFAULT_MAX_REFERENCE_FRACTION,
+            "coarse_unique_n": DEFAULT_COARSE_UNIQUE_N,
+            "moderate_unique_n": DEFAULT_MODERATE_UNIQUE_N,
+            "coarse_unique_fraction": DEFAULT_COARSE_UNIQUE_FRACTION,
+            "moderate_unique_fraction": DEFAULT_MODERATE_UNIQUE_FRACTION,
+            "coarse_largest_tie_fraction": DEFAULT_COARSE_LARGEST_TIE_FRACTION,
+            "moderate_largest_tie_fraction": DEFAULT_MODERATE_LARGEST_TIE_FRACTION,
+            "note": (
+                "Operational, label-free interpretation cutoffs only; not fitted "
+                "to RIP labels and not accuracy/confidence thresholds."
+            ),
+        },
+        "status_definitions": {
+            "ADPS_WEIGHT_STATUS": {
+                "ADAPTIVE_SUPPORTED": "Non-uniform ADPS weights with non-trivial internal reference and background groups.",
+                "LIMITED_REFERENCE": "Non-uniform ADPS weights, but the internal reference/background support is small or highly imbalanced.",
+                "EQUAL_WEIGHT_FALLBACK": "Dataset-specific adaptive weights were unavailable; equal weights were used.",
+                "SINGLE_COMPONENT_DOMINATED": "At least one ADPS component carries the configured dominant-weight threshold.",
+            },
+            "ADPS_SCORE_RESOLUTION": {
+                "HIGH": "Many distinct ADPS values with limited tying.",
+                "MODERATE": "Intermediate ADPS score granularity.",
+                "COARSE": "Few distinct ADPS values, very low unique-score fraction, or a large tied-score group.",
+            },
+            "CANDIDATE_RANK_STABILITY": {
+                "TIGHT": "Small cross-profile rank IQR.",
+                "MODERATE": "Intermediate cross-profile rank IQR.",
+                "WIDE": "Large cross-profile rank IQR; profile-sensitive candidate.",
+            },
+            "USER_INTERPRETATION": {
+                "ROBUST_MULTI_PROFILE_PRIORITY": "Top-10% rank in at least three broad profiles with tight dispersion; robust computational priority only.",
+                "ADPS_SUPPORTED_PROFILE_SENSITIVE": "ADPS provenance is supported but the candidate rank changes widely across profiles.",
+                "ADPS_SUPPORTED_GENERAL": "ADPS provenance is supported; candidate is not in the strict multi-profile priority class and is not widely profile-sensitive.",
+                "LIMITED_REFERENCE_RANKING": "Adaptive ADPS used a limited internal reference/background basis.",
+                "FALLBACK_RANKING": "ADPS is the equal-weight fallback in this dataset.",
+                "SINGLE_COMPONENT_DRIVEN": "ADPS is dominated by one evidence component in this dataset.",
+            },
+        },
         "warning": (
             "Agreement is not accuracy. These diagnostics do not identify the "
             "unknown RIP-optimal evidence route in an unlabeled dataset."
