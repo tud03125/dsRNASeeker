@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from modules.priority import add_priority_columns, priority_front_columns
 from modules.supervised import apply_supervised_priority
+from modules.robustness import write_ranking_robustness
 
 
 # DSRNASEEKER_PAIR_ID_RESOLUTION_FIX_V2
@@ -939,6 +940,21 @@ def run_summary(args) -> None:
     ])].sort_values("rank_score", ascending=False)
     relaxed.to_csv(relaxed_path, index=False)
 
+    # Label-free ranking-robustness diagnostics are derived entirely from the
+    # finished summary table. They do not rerun Step 5 coverage/strand calls,
+    # RNAfold/RNAcofold/null-Z/interface calculations, editing, or rMATS.
+    # Keep them in separate files so the historical primary summary remains
+    # byte/column compatible with existing benchmark scripts.
+    try:
+        robustness_paths = write_ranking_robustness(
+            M,
+            outdir=outdir,
+            case_label=case,
+        )
+    except Exception as e:
+        robustness_paths = {}
+        print(f"[WARN] ranking-robustness diagnostics were not written: {e}")
+
     print(f"[SUMMARY] wrote: {no_ri}")
     print(f"[SUMMARY] wrote: {with_ri}")
     print(f"[SUMMARY] wrote: {strict_path} ({len(strict)} rows)")
@@ -947,5 +963,7 @@ def run_summary(args) -> None:
         print(f"[SUMMARY] wrote: {weights_path}")
         print(f"[SUMMARY] wrote: {weights_long_path}")
     print(f"[SUMMARY] wrote: {relaxed_path} ({len(relaxed)} rows)")
+    for robustness_name, robustness_path in robustness_paths.items():
+        print(f"[SUMMARY] wrote robustness {robustness_name}: {robustness_path}")
     if getattr(args, "priority_score_mode", "adaptive") == "supervised":
         print(f"[SUMMARY] supervised outputs written under: {outdir}")
