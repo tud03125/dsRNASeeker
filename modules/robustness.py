@@ -548,7 +548,7 @@ def add_ranking_robustness(
     summary_row["DATASET_USER_GUIDANCE"] = _dataset_guidance_label(
         adps_weight_status, adps_score_resolution
     )
-    summary_row["MULTI_PROFILE_STABLE_HIGH_RANK_fraction"] = float(
+    summary_row["multi_profile_stable_high_rank_fraction"] = float(
         candidate["USER_INTERPRETATION"].eq("MULTI_PROFILE_STABLE_HIGH_RANK").mean()
     ) if len(candidate) else np.nan
     summary_row["profile_sensitive_fraction"] = float(
