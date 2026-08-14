@@ -10,6 +10,7 @@ from modules.zrna import run_zrna
 from modules.molecule_model import run_molecule_model
 from modules.workflow import run_workflow
 from modules.supervised_benchmark import run_supervised_benchmark
+from modules.robustness import run_robustness
 
 def add_execs(p: argparse.ArgumentParser) -> None:
     p.add_argument('--python-exe', default='python3')
@@ -379,6 +380,22 @@ def add_supervised_benchmark_args(p: argparse.ArgumentParser) -> None:
     p.add_argument('--seed', type=int, default=20260728)
 
 
+
+def add_robustness_args(p: argparse.ArgumentParser) -> None:
+    p.add_argument('--summary-in', required=True,
+                   help='Existing TEpair_dsRNA_master.summary.with_RI.csv. No upstream stages are rerun.')
+    p.add_argument('--output-dir', default=None,
+                   help='Output directory for diagnostics. Default: directory containing --summary-in.')
+    p.add_argument('--case-label', default=None,
+                   help='Case label used in output filenames. If omitted, infer from nearby adaptive-weight files when possible.')
+    p.add_argument('--dominant-weight-threshold', type=float, default=0.80,
+                   help='Descriptive threshold for flagging a single-component-dominated ADPS solution; not an accuracy threshold.')
+    p.add_argument('--agreement-tight-iqr', type=float, default=0.10,
+                   help='Descriptive broad-profile percentile-IQR cutoff for tight rank agreement.')
+    p.add_argument('--agreement-wide-iqr', type=float, default=0.25,
+                   help='Descriptive broad-profile percentile-IQR cutoff above which rank agreement is called wide/profile-sensitive.')
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog='dsRNASeeker', description='Condition-agnostic TE-pair dsRNA discovery pipeline.')
     sub = parser.add_subparsers(dest='command', required=True)
@@ -400,13 +417,15 @@ def build_parser() -> argparse.ArgumentParser:
     add_molecule_model_args(moleculep)
     supervisedp = sub.add_parser('supervised-benchmark', help='Run manifest-driven nested grouped and leave-one-study-family-out supervised evaluation.')
     add_supervised_benchmark_args(supervisedp)
+    robustp = sub.add_parser('robustness', help='Build label-free ranking-robustness diagnostics from an existing summary; does not rerun alignment, coverage, energetics, editing, or pairing.')
+    add_robustness_args(robustp)
     return parser
 
 
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
-    if args.command != 'supervised-benchmark':
+    if args.command not in {'supervised-benchmark', 'robustness'}:
         if getattr(args, 'rmats_group1_label', None) is None:
             args.rmats_group1_label = args.case_label
         if getattr(args, 'rmats_group2_label', None) is None:
@@ -425,6 +444,8 @@ def main() -> None:
         run_molecule_model(args)
     elif args.command == 'supervised-benchmark':
         run_supervised_benchmark(args)
+    elif args.command == 'robustness':
+        run_robustness(args)
     elif args.command == 'check':
         for line in check_runtime(args):
             print(line)
