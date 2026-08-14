@@ -354,7 +354,7 @@ def _candidate_user_interpretation(
     # even when ADPS used a fallback because it describes cross-profile stability.
     robust = (top10 >= 3) & (iqr <= float(tight_iqr))
     out = pd.Series("", index=candidate.index, dtype=object)
-    out.loc[robust] = "ROBUST_MULTI_PROFILE_PRIORITY"
+    out.loc[robust] = "MULTI_PROFILE_STABLE_HIGH_RANK"
 
     remaining = ~robust
     if adps_weight_status == "SINGLE_COMPONENT_DOMINATED":
@@ -548,8 +548,8 @@ def add_ranking_robustness(
     summary_row["DATASET_USER_GUIDANCE"] = _dataset_guidance_label(
         adps_weight_status, adps_score_resolution
     )
-    summary_row["robust_multi_profile_priority_fraction"] = float(
-        candidate["USER_INTERPRETATION"].eq("ROBUST_MULTI_PROFILE_PRIORITY").mean()
+    summary_row["MULTI_PROFILE_STABLE_HIGH_RANK_fraction"] = float(
+        candidate["USER_INTERPRETATION"].eq("MULTI_PROFILE_STABLE_HIGH_RANK").mean()
     ) if len(candidate) else np.nan
     summary_row["profile_sensitive_fraction"] = float(
         candidate["CANDIDATE_RANK_STABILITY"].eq("WIDE").mean()
@@ -665,7 +665,7 @@ experimental confidence classes and were not calibrated against RIP labels.
    calibrated probability.
 2. Start with the plain-language columns in the candidate table:
    `CANDIDATE_RANK_STABILITY` and `USER_INTERPRETATION`.
-   `ROBUST_MULTI_PROFILE_PRIORITY` means the candidate is in the top 10% under
+   `MULTI_PROFILE_STABLE_HIGH_RANK` means the candidate is in the top 10% under
    at least three broad evidence views with tight rank dispersion. It does **not**
    mean experimentally confirmed dsRNA.
 3. For details, inspect `broad_profile_top10_count`,
@@ -767,7 +767,7 @@ def write_ranking_robustness(
                 "WIDE": "Large cross-profile rank IQR; profile-sensitive candidate.",
             },
             "USER_INTERPRETATION": {
-                "ROBUST_MULTI_PROFILE_PRIORITY": "Top-10% rank in at least three broad profiles with tight dispersion; robust computational priority only.",
+                "MULTI_PROFILE_STABLE_HIGH_RANK": "Top-10% rank in at least three broad profiles with tight dispersion; robust computational priority only.",
                 "ADPS_SUPPORTED_PROFILE_SENSITIVE": "ADPS provenance is supported but the candidate rank changes widely across profiles.",
                 "ADPS_SUPPORTED_GENERAL": "ADPS provenance is supported; candidate is not in the strict multi-profile priority class and is not widely profile-sensitive.",
                 "LIMITED_REFERENCE_RANKING": "Adaptive ADPS used a limited internal reference/background basis.",
