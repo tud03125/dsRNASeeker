@@ -1,3 +1,0 @@
-sample_id	condition	bam_path
-S1	CASE	/path/to/S1.bam
-S2	CONTROL	/path/to/S2.bam
