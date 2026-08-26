@@ -33,6 +33,7 @@ dsRNASeeker/
 ├── environment.yml          # authoritative Conda environment
 ├── samplesheet.bam.example.tsv
 ├── samplesheet.fastq.example.tsv
+├── samplesheet.fastq.single_end.example.tsv
 ├── LICENSE
 └── README.md
 ```
