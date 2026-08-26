@@ -106,11 +106,11 @@ done
 Tab-delimited or CSV:
 
 ```text
-sample_id	condition	fastq_1	fastq_2	strandedness
-CASE_1	CASE	/path/CASE_1_R1.fastq.gz	/path/CASE_1_R2.fastq.gz	auto
-CASE_2	CASE	/path/CASE_2_R1.fastq.gz	/path/CASE_2_R2.fastq.gz	auto
-CTRL_1	CONTROL	/path/CTRL_1_R1.fastq.gz	/path/CTRL_1_R2.fastq.gz	auto
-CTRL_2	CONTROL	/path/CTRL_2_R1.fastq.gz	/path/CTRL_2_R2.fastq.gz	auto
+sample_id	condition	fastq_1	fastq_2
+CASE_1	CASE	/path/CASE_1_R1.fastq.gz	/path/CASE_1_R2.fastq.gz
+CASE_2	CASE	/path/CASE_2_R1.fastq.gz	/path/CASE_2_R2.fastq.gz
+CTRL_1	CONTROL	/path/CTRL_1_R1.fastq.gz	/path/CTRL_1_R2.fastq.gz
+CTRL_2	CONTROL	/path/CTRL_2_R1.fastq.gz	/path/CTRL_2_R2.fastq.gz
 ```
 
 For single-end FASTQ, leave `fastq_2` empty. Paired/single-end layout and read length can be inferred automatically unless explicitly overridden.
@@ -118,11 +118,11 @@ For single-end FASTQ, leave `fastq_2` empty. Paired/single-end layout and read l
 ### BAM input
 
 ```text
-sample_id	condition	bam_path	strandedness
-CASE_1	CASE	/path/CASE_1.bam	auto
-CASE_2	CASE	/path/CASE_2.bam	auto
-CTRL_1	CONTROL	/path/CTRL_1.bam	auto
-CTRL_2	CONTROL	/path/CTRL_2.bam	auto
+sample_id	condition	bam_path
+CASE_1	CASE	/path/CASE_1.bam
+CASE_2	CASE	/path/CASE_2.bam
+CTRL_1	CONTROL	/path/CTRL_1.bam
+CTRL_2	CONTROL	/path/CTRL_2.bam
 ```
 
 ## Quick start: end-to-end workflow
