@@ -3,22 +3,57 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - python>=3.10,<3.12
-  - numpy
-  - pandas
-  - pyyaml
-  - bedtools
-  - samtools
-  - deeptools
-  - pysam
-  - pybigwig
-  - viennarna
-  - intarna
-  - r-base>=4.2
+  # Core language runtimes
+  - python>=3.11,<3.12
+  - r-base>=4.5,<4.6
+
+  # Python libraries used directly by dsRNASeeker / bundled REDItools2
+  - numpy>=1.26,<3
+  - pandas>=2.2,<4
+  - scikit-learn>=1.5,<2
+  - joblib>=1.4
+  - pysam>=0.22
+  - pybigwig>=0.3.22
+  - mpi4py>=4
+  - psutil>=6
+  - netifaces>=0.11
+  - sortedcontainers>=2.4
+
+  # Command-line bioinformatics tools
+  - bedtools>=2.31,<2.32
+  - samtools>=1.22,<1.24
+  - star>=2.7.11,<2.8
+  - subread>=2.0,<2.2
+  - rmats>=4.3,<4.4
+  - rseqc>=5,<6
+  - deeptools>=3.5,<4
+  - bwa>=0.7.17
+  - viennarna>=2.7,<2.8
+  - intarna>=1.2,<2
+
+  # R / Bioconductor packages used directly by bundled R helpers
+  - r-data.table
+  - r-dplyr
+  - r-tibble
+  - r-ashr
+  - bioconductor-atena
+  - bioconductor-deseq2
+  - bioconductor-chipseeker
+  - bioconductor-regioner
   - bioconductor-genomicfeatures
   - bioconductor-genomicranges
   - bioconductor-iranges
   - bioconductor-s4vectors
+  - bioconductor-summarizedexperiment
+  - bioconductor-biocparallel
+  - bioconductor-annotationdbi
+  - bioconductor-genomeinfodb
+  - bioconductor-rtracklayer
   - bioconductor-txdbmaker
-  - r-data.table
-  - scikit-learn
+
+  # Standard genome annotation packages supported by advanced TE mode
+  - bioconductor-txdb.hsapiens.ucsc.hg38.knowngene
+  - bioconductor-txdb.mmusculus.ucsc.mm39.knowngene
+  - bioconductor-txdb.mmusculus.ucsc.mm10.knowngene
+  - bioconductor-org.hs.eg.db
+  - bioconductor-org.mm.eg.db
