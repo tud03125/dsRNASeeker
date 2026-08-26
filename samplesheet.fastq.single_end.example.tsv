@@ -1,0 +1,5 @@
+sample_id	condition	fastq_1	fastq_2
+CASE_1	CASE	/path/to/CASE_1.fastq.gz	
+CASE_2	CASE	/path/to/CASE_2.fastq.gz	
+CONTROL_1	CONTROL	/path/to/CONTROL_1.fastq.gz	
+CONTROL_2	CONTROL	/path/to/CONTROL_2.fastq.gz	
