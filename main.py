@@ -205,7 +205,7 @@ def add_workflow_args(p: argparse.ArgumentParser) -> None:
 
     # TE analysis
     p.add_argument('--skip-te-analysis', action='store_true', default=False, help='Skip TE analysis and reuse --precomputed-csv-in or existing internal TE CSV')
-    p.add_argument('--te-mode', choices=['advanced', 'simple'], default='advanced',
+    p.add_argument('--te-mode', choices=['advanced'], default='advanced',
                    help='advanced = atena/qtex + DESeq2 + ChIPseeker; simple = featureCounts + DESeq2 fallback')
     p.add_argument('--te-genome', default='auto',
                    help=('Genome key used by the advanced atena/ChIPseeker module. '
