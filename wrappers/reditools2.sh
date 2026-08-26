@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export PYTHONNOUSERSITE=1
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REDITOOLS="${ROOT}/tools/REDItools2/src/cineca/reditools.py"
 
-exec /rs01/projects/jadezhoulab/tud03125/anaconda3/envs/dott_pipeline_Temple/dsRNASeeker_2/bin/python \
-  /rs01/home/levinm/dsRNASeeker_2/tools/REDItools2/src/cineca/reditools.py "$@"
+if [[ ! -f "${REDITOOLS}" ]]; then
+    echo "ERROR: REDItools2 submodule not found: ${REDITOOLS}" >&2
+    echo "Run: git submodule update --init --recursive" >&2
+    exit 2
+fi
+
+export PYTHONNOUSERSITE=1
+exec "${PYTHON:-python3}" "${REDITOOLS}" "$@"
