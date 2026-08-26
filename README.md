@@ -31,7 +31,8 @@ dsRNASeeker/
 │   ├── REDItools2/          # Git submodule
 │   └── SPRINT/              # Git submodule; optional
 ├── environment.yml          # authoritative Conda environment
-├── samplesheet.example.tsv
+├── samplesheet.bam.example.tsv
+├── samplesheet.fastq.example.tsv
 ├── LICENSE
 └── README.md
 ```
