@@ -206,7 +206,7 @@ def add_workflow_args(p: argparse.ArgumentParser) -> None:
     # TE analysis
     p.add_argument('--skip-te-analysis', action='store_true', default=False, help='Skip TE analysis and reuse --precomputed-csv-in or existing internal TE CSV')
     p.add_argument('--te-mode', choices=['advanced'], default='advanced',
-                   help='advanced = atena/qtex + DESeq2 + ChIPseeker; simple = featureCounts + DESeq2 fallback')
+                   help='advanced = atena/qtex + DESeq2 + ChIPseeker (public v1.x mode)')
     p.add_argument('--te-genome', default='auto',
                    help=('Genome key used by the advanced atena/ChIPseeker module. '
                          'Standard values include hg38, mm39, and mm10. '
@@ -237,8 +237,8 @@ def add_workflow_args(p: argparse.ArgumentParser) -> None:
     p.add_argument('--te-orgdb-package', default=None,
                    help=('Optional OrgDb package override, e.g. org.Hs.eg.db or '
                          'org.Mm.eg.db. For mouse T2T, use org.Mm.eg.db.'))
-    p.add_argument('--te-feature-type', default='exon', help='Used only with --te-mode simple')
-    p.add_argument('--te-attribute', default='gene_id', help='Used only with --te-mode simple')
+    p.add_argument('--te-feature-type', default='exon', help='Legacy internal fallback option; ignored by public advanced TE mode')
+    p.add_argument('--te-attribute', default='gene_id', help='Legacy internal fallback option; ignored by public advanced TE mode')
     p.add_argument('--te-padj-max', type=float, default=0.10)
     p.add_argument('--te-lfc-min', type=float, default=1.0,
                    help='For advanced mode, mirrors your old |log2FC| > 1 significant TE threshold by default.')
@@ -252,7 +252,7 @@ def add_workflow_args(p: argparse.ArgumentParser) -> None:
                    help='For --te-candidate-mode expressed, optional padj cutoff for the candidate universe. 1.0 keeps all expressed tested rows regardless of padj.')
     p.add_argument('--te-candidate-lfc-min', type=float, default=0.0,
                    help='For --te-candidate-mode expressed, optional abs(log2FC) cutoff for the candidate universe. 0 keeps all expressed tested rows.')
-    p.add_argument('--featurecounts-exe', default='featureCounts', help='Used only with --te-mode simple')
+    p.add_argument('--featurecounts-exe', default='featureCounts', help='Legacy internal fallback option; ignored by public advanced TE mode')
 
     # rMATS: internally b1=case and b2=control, so dPSI=case-control.
     p.add_argument('--skip-rmats', action='store_true', default=False)
