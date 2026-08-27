@@ -86,7 +86,7 @@ def _assert_dir_exists(path: Path, context: str) -> None:
     if not path.exists():
         raise FileNotFoundError(
             f"Scratch directory disappeared during {context}: {path}. "
-            "Use a non-purged scratch location, e.g. export DSRNASEEKER_SCRATCH=/rs01/projects/jadezhoulab/tud03125/dsRNASeeker_scratch/$SLURM_JOB_ID, "
+            "Use a non-purged scratch location, e.g. export DSRNASEEKER_SCRATCH=/path/to/project_scratch/$SLURM_JOB_ID, "
             "or avoid running multiple workflows with the same shared scratch root."
         )
 
