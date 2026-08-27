@@ -22,7 +22,7 @@ dependencies:
   # Command-line bioinformatics tools
   - bedtools>=2.31,<2.32
   - samtools>=1.22,<1.24
-  - star>=2.7.11,<2.8
+  - star=2.7.11b
   - subread>=2.0,<2.2
   - rmats>=4.3,<4.4
   - rseqc>=5,<6
