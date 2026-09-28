@@ -1,0 +1,5 @@
+[
+  {"study":"GSE308488/9","assay":"FLAG-ZBP1","primary_radius":"1 kb","labels":"75 positive / 52 confident-negative","adps_ap":0.756443,"adps_auc":0.762179},
+  {"study":"GSE184962/4","assay":"Z22","supervised_diagnostic_radius":"5 kb","labels":"20 positive / 38 confident-negative","adps_ap":0.282718,"adps_auc":0.367105},
+  {"study":"GSE244103","assay":"J2","primary_radius":"1 kb","labels":"642 positive / 575 confident-negative","adps_ap":0.658500,"adps_auc":0.618415}
+]

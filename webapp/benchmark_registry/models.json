@@ -1,0 +1,5 @@
+[
+  {"name":"ADPS","type":"label-independent","recommended_default":true,"note":"Portable default ranking."},
+  {"name":"Fixed L2 same-study supervised","type":"assay-matched adaptation","recommended_default":false,"note":"Use only when candidate-level labels are available for the same assay/context."},
+  {"name":"Universal cross-study supervised","type":"pretrained transfer","recommended_default":false,"note":"Not recommended by current FLAG-ZBP1/Z22/J2 leave-one-study-family-out results."}
+]
