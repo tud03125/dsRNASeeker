@@ -1,0 +1,13 @@
+pair_id	A_annotation	B_annotation	genomic_orientation	transcript_orientation	summary_side	CASE_AtoI_hits_window	CONTROL_AtoI_hits_window	CASE_REDI_hits_window	CONTROL_REDI_hits_window	RI_direction_majority_W	RI_direction_majority_A	RI_direction_majority_B	MFE_norm_kcalpermkb	ddG_norm_kcalpermkb	ddG_Z	interface_bpp_mean_arm_fraction	interface_bpp_max
+SMOKE_01	Distal Intergenic	Downstream	inverted	inverted	both_CASE_up	3	0	0	0	CASE_high_RI	CASE_high_RI		-10.0	-2.0	-1.0	0.05	0.2
+SMOKE_02	Intron	Intron	inverted	inverted	both_CASE_up	0	0	2	0	CASE_high_RI		CASE_high_RI	-11.0	-2.3333333333333335	-1.25	0.08	0.26
+SMOKE_03	Intron	Intron	inverted	inverted	both_CASE_up	3	0	2	0				-12.0	-2.6666666666666665	-1.5	0.11	0.32
+SMOKE_04	Intron	Downstream	inverted	inverted	both_CASE_up	0	0	0	0	CASE_high_RI	CASE_high_RI		-13.0	-3.0	-1.75	0.14	0.38
+SMOKE_05	Distal Intergenic	Intron	inverted	inverted	both_CASE_up	0	0	2	0				-14.0	-3.333333333333333	-2.0	0.16999999999999998	0.44
+SMOKE_06	Intron	Intron	inverted	inverted	both_CASE_up	3	0	0	0	CASE_high_RI		CASE_high_RI	-15.0	-3.666666666666667	-2.25	0.2	0.5
+SMOKE_07	Intron	Downstream	inverted	inverted	both_CASE_up	0	0	0	0				-16.0	-4.0	-2.5	0.22999999999999998	0.56
+SMOKE_08	Intron	Intron	inverted	inverted	A_CASE_up	0	0	0	0				-17.0	-4.333333333333334	-2.75	0.26	0.62
+SMOKE_09	Distal Intergenic	Intron	inverted	inverted	A_CASE_up	0	0	0	0				-18.0	-4.666666666666666	-3.0	0.29	0.6799999999999999
+SMOKE_10	Intron	Downstream	inverted	direct	neutral	0	0	0	0				-19.0	-5.0	-3.25	0.32	0.74
+SMOKE_11	Intron	Intron	direct	direct	neutral	0	0	0	0				-20.0	-5.333333333333334	-3.5	0.35	0.8
+SMOKE_12	Intron	Intron	inverted	inverted	neutral	0	0	0	0				-21.0	-5.666666666666666	-3.75	0.37999999999999995	0.8599999999999999
