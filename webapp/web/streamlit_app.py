@@ -150,9 +150,28 @@ with t2:
                 ranked, fold_table = same_study_rerank(df, outer_folds=int(folds))
                 st.success(f"Ranked {len(ranked)} labeled candidates.")
                 st.markdown("**Fold assignment / diagnostic table**")
+                if source == "Bundled example":
+                    st.caption(
+                        "The bundled 30-row example is a smoke-test fixture for the web workflow, "
+                        "not a manuscript benchmark. Because individual grouped test folds are small, "
+                        "fold-level AP/ROC-AUC values can be extreme (including 0 or 1) and should be "
+                        "interpreted only as diagnostics of the example run."
+                    )
                 st.dataframe(fold_table, use_container_width=True)
+
                 st.markdown("**Top supervised-ranked candidates**")
-                st.dataframe(ranked.head(200), use_container_width=True)
+                preferred = [
+                    "pair_id", "supervised_score", "label", "group_id",
+                    "adaptive_priority_score", "orientation_adps", "annotation_adps",
+                    "case_expression_adps", "energy_adps", "interface_adps",
+                    "case_editing_adps", "RI_adps",
+                ]
+                display_cols = [c for c in preferred if c in ranked.columns]
+                display_cols += [c for c in ranked.columns if c not in display_cols]
+                st.dataframe(
+                    ranked.loc[:, display_cols].head(200),
+                    use_container_width=True,
+                )
                 st.download_button(
                     "Download supervised ranking TSV",
                     ranked.to_csv(sep="\t", index=False).encode(),
@@ -168,10 +187,44 @@ with t3:
     models = load_json("models.json")
 
     st.markdown("**Benchmark studies**")
-    st.dataframe(pd.DataFrame(studies), use_container_width=True, hide_index=True)
+    study_df = pd.DataFrame(studies).copy()
+    for c in ["primary_radius", "supervised_diagnostic_radius"]:
+        if c not in study_df.columns:
+            study_df[c] = None
+    study_df = study_df[
+        [
+            "study", "assay", "primary_radius", "supervised_diagnostic_radius",
+            "labels", "adps_ap", "adps_auc",
+        ]
+    ].rename(
+        columns={
+            "study": "Study",
+            "assay": "Assay",
+            "primary_radius": "Primary radius",
+            "supervised_diagnostic_radius": "Supervised diagnostic radius",
+            "labels": "Labels",
+            "adps_ap": "ADPS AP",
+            "adps_auc": "ADPS ROC-AUC",
+        }
+    ).fillna("—")
+    st.dataframe(study_df, use_container_width=True, hide_index=True)
+
+    st.caption(
+        "A dash indicates that the radius is not designated for that role. "
+        "For GSE184962/4, 5 kb is the expanded supervised-diagnostic radius, "
+        "not the default primary radius."
+    )
 
     st.markdown("**Ranking modes**")
-    st.dataframe(pd.DataFrame(models), use_container_width=True, hide_index=True)
+    model_df = pd.DataFrame(models).rename(
+        columns={
+            "name": "Name",
+            "type": "Type",
+            "recommended_default": "Recommended default",
+            "note": "Note",
+        }
+    )
+    st.dataframe(model_df, use_container_width=True, hide_index=True)
 
     with st.expander("Raw registry JSON"):
         st.json(studies)
@@ -201,9 +254,9 @@ with t4:
   expose private FCCC filesystem paths.
 
 ### Reproducibility
-The manuscript release should cite the exact Git commit/tag and the matching
-permanent archive DOI. The GitHub repository contains installation instructions,
-environment specification, command-line examples, and manuscript reproduction
-materials.
+The GitHub repository provides installation instructions, environment specifications,
+command-line examples, test inputs, and manuscript-reproduction materials. The exact
+submission release will be identified in the manuscript by a versioned Git tag and a
+matching permanent archive DOI once the release is frozen.
 """
     )
