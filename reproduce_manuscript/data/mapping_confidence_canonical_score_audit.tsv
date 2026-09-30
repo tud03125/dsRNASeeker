@@ -1,0 +1,4 @@
+dataset	n_pairs	max_abs_difference_canonical_vs_mapping_ADPS	n_difference_gt_1e-12
+GSE308489__w1000_standardized	878	0.0	0
+GSE184962_4__w5000_expanded	117	0.0	0
+GSE244103__w1000_standardized	14089	0.0	0

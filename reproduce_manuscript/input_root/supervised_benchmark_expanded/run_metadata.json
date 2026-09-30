@@ -1,0 +1,74 @@
+{
+  "manifest": "reproduce_manuscript/input_root/supervised_input_expanded/supervised_benchmark_manifest.tsv",
+  "input_root": ".",
+  "output_dir": "reproduce_manuscript/reproduced/supervised_benchmark",
+  "outer_folds": 5,
+  "inner_folds": 3,
+  "selection_metric": "average_precision",
+  "c_grid": "0.03,0.3,3",
+  "l1_ratio_grid": "0,0.5,1",
+  "bootstrap": 2000,
+  "seed": 20260925,
+  "same_study_min_positive": 10,
+  "same_study_min_negative": 10,
+  "feature_panels": {
+    "raw7": [
+      "orientation_adps",
+      "annotation_adps",
+      "case_expression_adps",
+      "energy_adps",
+      "interface_adps",
+      "case_editing_adps",
+      "RI_adps"
+    ],
+    "routes6": [
+      "score_route_substrate_context",
+      "score_route_inverted_structure",
+      "score_route_condition_structure",
+      "score_route_editing_marked",
+      "score_route_intron_persistence",
+      "score_route_context_structure"
+    ]
+  },
+  "route_definitions": {
+    "score_route_substrate_context": [
+      "orientation_adps",
+      "annotation_adps",
+      "case_expression_adps"
+    ],
+    "score_route_inverted_structure": [
+      "orientation_adps",
+      "energy_adps",
+      "interface_adps"
+    ],
+    "score_route_condition_structure": [
+      "case_expression_adps",
+      "energy_adps",
+      "interface_adps"
+    ],
+    "score_route_editing_marked": [
+      "energy_adps",
+      "interface_adps",
+      "case_editing_adps"
+    ],
+    "score_route_intron_persistence": [
+      "annotation_adps",
+      "case_expression_adps",
+      "RI_adps",
+      "energy_adps",
+      "interface_adps"
+    ],
+    "score_route_context_structure": [
+      "annotation_adps",
+      "case_expression_adps",
+      "energy_adps",
+      "interface_adps"
+    ]
+  },
+  "solver_policy": {
+    "l1_ratio_0": "lbfgs_l2",
+    "l1_ratio_gt_0": "saga_elasticnet",
+    "inner_selection_requires_all_valid_folds": true,
+    "final_fit_fallback": "best_inner_evaluated_l2_then_prespecified_raw7_l2"
+  }
+}

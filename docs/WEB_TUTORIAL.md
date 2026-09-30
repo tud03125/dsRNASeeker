@@ -1,6 +1,6 @@
 # dsRNASeeker Web Explorer tutorial
 
-Public app: replace this line with the final `https://...streamlit.app/` URL.
+Public app: https://dsrnaseeker-kvqciapfzxrodulzmpdyb9.streamlit.app/
 
 ## ADPS example
 

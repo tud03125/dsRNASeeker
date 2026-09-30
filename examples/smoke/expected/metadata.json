@@ -1,0 +1,8 @@
+{
+  "input_sha256": "5275c452b16654a08ffe1ce25c31e72e53a2c73b514a30e8881c138b2d1ad82a",
+  "expected_sha256": "d709869c31b2f1ad2551fc1defb18d962a266c99b45718d82790871deb100e43",
+  "case": "CASE",
+  "control": "CONTROL",
+  "score_mode": "adaptive",
+  "annotation_policy": "conservative"
+}

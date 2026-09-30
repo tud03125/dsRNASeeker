@@ -4,6 +4,10 @@
 
 > **Scope.** dsRNASeeker targets an important inverted-TE-associated subclass of dsRNA. It is not a universal detector of every biological dsRNA source, and its structural outputs are computational predictions rather than direct proof of in-vivo duplex formation.
 
+## Web Explorer
+
+Public HTTPS application: https://dsrnaseeker-kvqciapfzxrodulzmpdyb9.streamlit.app/
+
 ## What dsRNASeeker integrates
 
 The end-to-end workflow can combine:

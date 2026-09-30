@@ -1,0 +1,5 @@
+# dsRNASeeker environment snapshot
+generated=2026-09-29T23:00:36-04:00
+conda_prefix=manuscript-tested Linux environment
+python=Python 3.12.7
+git_commit=e18094f1cbeaa9ff8f1d510aed86555a6000bd14

@@ -1,0 +1,8 @@
+dataset_id	analysis_variant	study_family	audit_table	same_study_eligible	loso_representative	loso_target	n_labeled	n_positive	n_negative	n_groups
+GSE308489__w1000_standardized	w1000_standardized	HSV1_FLAG_ZBP1	reproduce_manuscript/input_root/supervised_input_expanded/GSE308489__w1000_standardized.audit.tsv	1	1	1	127	75	52	62
+GSE184962_4__w1000_standardized	w1000_standardized	IFNb_Z22	reproduce_manuscript/input_root/supervised_input_expanded/GSE184962_4__w1000_standardized.audit.tsv	0	0	1	8	5	3	7
+GSE184962_4__w5000_expanded	w5000_expanded	IFNb_Z22	reproduce_manuscript/input_root/supervised_input_expanded/GSE184962_4__w5000_expanded.audit.tsv	1	1	1	58	20	38	35
+GSE244103__w1000_standardized	w1000_standardized	DHX9_J2	reproduce_manuscript/input_root/supervised_input_expanded/GSE244103__w1000_standardized.audit.tsv	1	1	1	1217	642	575	1217
+GSE220315__frozen_august	frozen_august	GSE220315	reproduce_manuscript/input_root/supervised_input_expanded/GSE220315__frozen_august.audit.tsv	1	1	1	104	65	39	104
+GSE244104__frozen_august	frozen_august	DHX9_J2	reproduce_manuscript/input_root/supervised_input_expanded/GSE244104__frozen_august.audit.tsv	1	0	1	683	444	239	683
+GSE293278__frozen_august	frozen_august	ADAR1_KO	reproduce_manuscript/input_root/supervised_input_expanded/GSE293278__frozen_august.audit.tsv	1	1	1	71	18	53	71

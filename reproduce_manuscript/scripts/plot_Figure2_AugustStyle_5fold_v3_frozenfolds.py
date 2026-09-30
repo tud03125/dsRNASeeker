@@ -83,8 +83,8 @@ def parse_args():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument(
         "--root",
-        default="/rs01/projects/jadezhoulab/tud03125/dsRNASeeker_major_revision_20260925",
-        help="Major-revision output root.",
+        default="reproduce_manuscript/input_root",
+        help="Staged manuscript input root.",
     )
     p.add_argument("--supervised-dir", default=None,
                    help="Override supervised benchmark directory.")
@@ -92,14 +92,14 @@ def parse_args():
                    help="Override supervised input/audit directory.")
     p.add_argument("--benchmark-table", default=None,
                    help="Override all_method_candidate_scores.tsv.gz path.")
-    p.add_argument("--outdir", default=None)
+    p.add_argument("--outdir", default="reproduce_manuscript/reproduced/Figure2")
     p.add_argument("--grid-points", type=int, default=201)
     p.add_argument("--include-native-dsrnascan", action="store_true")
     p.add_argument(
         "--fold-assignments",
-        default=None,
+        default="reproduce_manuscript/data/Figure2_outer_fold_assignments.tsv",
         help=(
-            "Optional frozen Figure2_outer_fold_assignments.tsv. When provided, "
+            "Frozen Figure2_outer_fold_assignments.tsv. By default, "
             "these canonical pair-to-fold assignments are used instead of "
             "regenerating StratifiedGroupKFold splits. This makes manuscript "
             "reproduction independent of scikit-learn splitter-version changes."
@@ -524,7 +524,7 @@ def main():
     print(f"[OK] {svg}")
     print(f"[OK] {outdir / 'Figure2_fold_metrics.csv'}")
     print(f"[OK] {outdir / 'Figure2_metric_summary_meanSD.csv'}")
-    print(f"[OK] fold seed={seed}; n_splits={n_splits}")
+    print(f"[OK] frozen outer folds={n_splits}; metadata_seed={seed}")
     return 0
 
 
