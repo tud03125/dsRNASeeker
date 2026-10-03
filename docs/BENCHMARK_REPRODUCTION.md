@@ -50,9 +50,13 @@ Final rendered figures are supplied in `reproduce_manuscript/figures/`.
 
 ## Public-data provenance
 
-Public sequence data are identified by GEO accessions in the manuscript and benchmark
-registry. The in-house mouse-liver RNA-seq accession must be inserted here and in the
-manuscript Data Availability Statement once deposition is complete.
+All sequencing datasets used in the manuscript are publicly available through
+their cited GEO/SRA accessions. The public mouse-liver FPC application uses
+GSE162876, part of SuperSeries GSE162878. Frozen inputs, candidate summaries,
+analysis outputs, sample provenance, and figure-source files for this application
+are archived under:
+
+`reproduce_manuscript/applications/GSE162876_FPC/`
 
 ## Scope of the smoke test
 

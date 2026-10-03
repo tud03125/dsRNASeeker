@@ -1,0 +1,2 @@
+dataset,species,case,control,input_gene_count_rows,retained_ranked_genes,candidate_genes_in_summary,candidate_genes_in_ranked_universe,msigdb_identifier_overlap_n,msigdb_identifier_overlap_fraction,hallmark_version
+GSE162876_FPC_Advanced_vs_Control,mouse,FPC_Advanced,FPC_Control,50763,14135,26,19,3227,0.22829854969932792,2026.1.Mm

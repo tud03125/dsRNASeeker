@@ -1,0 +1,4 @@
+candidate_set	n_genes_in_ranked_universe	genes
+dsRNASeeker_all_candidate_genes	19	Gm31036;Ttc39a;Gm14102;Greb1l;Fermt1;Arhgap6;Gm33429;Mug1;Cidec;Gm33543;Gm52871;Gm12909;Ttc39c;Cyp3a25;Cyp2c37;Akr1d1;Gm15998;Sult2a8;Nlrp5-ps
+dsRNASeeker_priority_top20_genes	8	Gm31036;Ttc39a;Gm14102;Greb1l;Fermt1;Arhgap6;Gm33429;Mug1
+dsRNASeeker_structure_top20_genes	12	Cidec;Gm33543;Ttc39a;Ttc39c;Cyp3a25;Gm14102;Mug1;Gm33429;Arhgap6;Gm15998;Sult2a8;Greb1l

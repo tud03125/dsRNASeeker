@@ -23,6 +23,8 @@ That directory is intentionally excluded from version control so that
 reproduction runs do not modify the frozen source bundle.
 
 Public sequencing datasets are identified by accession in the manuscript
-and benchmark documentation. The in-house mouse-liver sequencing accession
-will be added to the manuscript and reproduction documentation once its
-public deposition is finalized.
+and benchmark documentation. The public mouse-liver FPC application uses
+GSE162876, part of SuperSeries GSE162878, with frozen manuscript-facing
+materials archived under:
+
+    reproduce_manuscript/applications/GSE162876_FPC/
