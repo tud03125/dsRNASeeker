@@ -215,6 +215,29 @@ def add_adps_feature_columns(M: pd.DataFrame, *, case: str, control: str, annota
     M["priority_gate_orientation"] = g_inv | t_inv
     M["orientation_adps"] = _mean_available(orientation_supports, idx)
 
+    # Observability only: preserve canonical ADPS and all existing eligibility gates.
+    # Missing/unrecognized orientation annotations are NOT interpreted as measured direct.
+    _g_raw = M["genomic_orientation"].astype(str).str.strip().str.lower() if "genomic_orientation" in M.columns else pd.Series("", index=idx)
+    _t_raw = M["transcript_orientation"].astype(str).str.strip().str.lower() if "transcript_orientation" in M.columns else pd.Series("", index=idx)
+    _g_valid = _g_raw.isin(["direct", "inverted"])
+    _t_valid = _t_raw.isin(["direct", "inverted"])
+    _both = _g_valid & _t_valid
+    M["orientation_genomic_recorded"] = _g_valid.astype(bool)
+    M["orientation_transcript_recorded"] = _t_valid.astype(bool)
+    M["orientation_genomic_inverted_provenance"] = np.where(_g_valid, _g_raw.eq("inverted").astype(float), np.nan)
+    M["orientation_transcript_inverted_provenance"] = np.where(_t_valid, _t_raw.eq("inverted").astype(float), np.nan)
+    M["orientation_component_discordant"] = np.where(_both, (_g_raw.eq("inverted") != _t_raw.eq("inverted")).astype(float), np.nan)
+    M["orientation_component_provenance_state"] = np.select(
+        [
+            _both & _g_raw.eq("inverted") & _t_raw.eq("inverted"),
+            _both & _g_raw.eq("inverted") & _t_raw.eq("direct"),
+            _both & _g_raw.eq("direct") & _t_raw.eq("inverted"),
+            _both & _g_raw.eq("direct") & _t_raw.eq("direct"),
+        ],
+        ["both_inverted", "genomic_only_inverted", "transcript_only_inverted", "neither_inverted"],
+        default="orientation_annotation_unverified",
+    )
+
     summary_side = M.get("summary_side", pd.Series("", index=idx)).astype(str)
     M["priority_gate_case_TE"] = summary_side.eq(f"both_{case}_up")
     M["case_expression_adps"] = pd.Series(

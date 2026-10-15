@@ -41,9 +41,10 @@ COMPONENT_ALIASES = {
     "RI_adps": ("RI_adps", "RI_adps_z01", "component_RI"),
 }
 BASELINE_ALIASES = {
+    # Rank/case_priority/evidence_score columns can be overwritten by supervised
+    # re-ranking; they are NOT unambiguous canonical ADPS provenance.
     "score_integrated_adps": (
-        "score_integrated_adps", "adaptive_priority_score", "case_priority_score",
-        "rank_score", "evidence_score_raw",
+        "score_integrated_adps", "adaptive_priority_score",
     ),
     "score_equal_weight_all": ("score_equal_weight_all",),
     "score_duplex_structure_only": ("score_duplex_structure_only",),
@@ -132,7 +133,15 @@ def normalize_audit_table(spec: VariantSpec) -> pd.DataFrame:
     out = raw[["pair_id", "label", "group_id"]].copy()
     out["label"] = pd.to_numeric(out["label"], errors="coerce")
     out = out.loc[out["label"].notna()].copy()
+    if not out["label"].isin([0, 1]).all():
+        raise ValueError(f"{spec.audit_table}: labels must be exactly 0, 1, or missing; no fractional-to-integer casting")
     out["label"] = out["label"].astype(int)
+    if out["pair_id"].isna().any() or out["pair_id"].astype(str).str.strip().eq("").any():
+        raise ValueError(f"{spec.audit_table}: blank/missing pair_id")
+    if out["pair_id"].duplicated().any():
+        raise ValueError(f"{spec.audit_table}: duplicate labeled pair_id values")
+    if out["group_id"].isna().any() or out["group_id"].astype(str).str.strip().eq("").any():
+        raise ValueError(f"{spec.audit_table}: blank/missing group_id; fix grouping upstream")
     if not set(out["label"].unique()).issubset({0, 1}):
         raise ValueError(f"Unexpected labels in {spec.audit_table}: {sorted(out['label'].unique())}")
     out["group_id"] = out["group_id"].astype(str)
@@ -144,10 +153,14 @@ def normalize_audit_table(spec: VariantSpec) -> pd.DataFrame:
         )
     out = ensure_route_features(out)
     source = _first_existing(raw.columns, BASELINE_ALIASES["score_integrated_adps"])
-    out["score_integrated_adps"] = (
-        pd.to_numeric(raw.loc[out.index, source], errors="coerce")
-        if source else out[RAW7_FEATURES].mean(axis=1, skipna=True)
-    )
+    if source is None:
+        raise ValueError(
+            f"{spec.audit_table}: no original integrated ADPS column; "
+            "refusing to fabricate an ADPS baseline from the mean of features"
+        )
+    out["score_integrated_adps"] = pd.to_numeric(raw.loc[out.index, source], errors="coerce")
+    if not np.isfinite(out["score_integrated_adps"].to_numpy(float)).all():
+        raise ValueError(f"{spec.audit_table}: original integrated ADPS contains missing/nonfinite scores")
     source = _first_existing(raw.columns, BASELINE_ALIASES["score_equal_weight_all"])
     out["score_equal_weight_all"] = (
         pd.to_numeric(raw.loc[out.index, source], errors="coerce")
@@ -273,14 +286,17 @@ def fixed_grouped_oof(data: pd.DataFrame, *, outer_folds: int, seed: int) -> tup
     splits, method = _choose_cv_splits(data, y, groups, cv_folds=outer_folds, random_state=seed)
     if not splits:
         raise ValueError("Could not construct grouped outer folds for fixed L2 model")
-    features = _available_features(data, data, RAW7_FEATURES)
-    if not features:
-        raise ValueError("No nonconstant raw7 features available")
+    # Freeze the exact seven-component feature contract before any outer folds.
+    # Do not inspect held-out fold variation to decide the model's feature panel.
+    features = list(RAW7_FEATURES)
     oof = np.full(len(data), np.nan)
     rows: list[dict[str, Any]] = []
     for fold, (train_idx, test_idx) in enumerate(splits, start=1):
         train, test = data.iloc[train_idx], data.iloc[test_idx]
         y_train, y_test = train["label"].astype(int), test["label"].astype(int)
+        missing_train = [f for f in features if train[f].notna().sum() == 0]
+        if missing_train:
+            raise ValueError(f"Outer fold {fold}: no training measurements for {missing_train}")
         model = _model(seed + fold, model_type="legacy_l2", C=1.0, l1_ratio=None)
         model, converged = _fit_checked(
             model, train[features].apply(pd.to_numeric, errors="coerce"),
@@ -453,6 +469,7 @@ def run_loso(
     specs: list[VariantSpec], data: dict[tuple[str, str], pd.DataFrame],
     output_dir: Path, *, inner_folds: int, selection_metric: str,
     c_grid: str, l1_grid: str, bootstrap: int, seed: int,
+    loso_model: str = "fixed_l2_raw7",
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     representatives = [s for s in specs if s.loso_representative]
     targets = [s for s in specs if s.loso_target]
@@ -475,23 +492,49 @@ def run_loso(
         if not parts: continue
         train = pd.concat(parts, ignore_index=True)
         if train["label"].nunique() < 2: continue
-        args = _selection_args(
-            inner_folds=inner_folds, seed=seed + family_index * 10000,
-            metric=selection_metric, c_grid=c_grid, l1_grid=l1_grid,
-        )
-        config, tuning = _select_configuration(
-            train, train, train["label"].astype(int), train["prefixed_group_id"],
-            args, family=train["study_family"],
-        )
-        weights = _family_class_balanced_weights(train["label"], train["study_family"])
-        model, config, fit_status = _fit_selected_with_fallback(
-            train, train, train["label"].astype(int), config, tuning,
-            random_state=seed + family_index, sample_weight=weights,
-        )
-        features = list(config["features"])
-        tuning.assign(held_out_family=held_family).to_csv(
-            output_dir / f"loso_tuning_holdout_{held_family}.csv", index=False
-        )
+        if loso_model == "fixed_l2_raw7":
+            # This matches the fixed seven-component L2 model declared in the manuscript.
+            # Features and hyperparameters are frozen, not optimized using held-out labels.
+            features = list(RAW7_FEATURES)
+            missing_training = [c for c in features if train[c].notna().sum() == 0]
+            if missing_training:
+                raise ValueError(
+                    f"Holdout {held_family}: entire training feature(s) missing: "
+                    f"{missing_training}; cannot claim a seven-feature fixed model"
+                )
+            model = _model(seed + family_index, model_type="legacy_l2", C=1.0, l1_ratio=None)
+            model, converged = _fit_checked(
+                model, train[features].apply(pd.to_numeric, errors="coerce"),
+                train["label"].astype(int), _class_balanced_weights(train["label"]),
+            )
+            if not converged:
+                raise RuntimeError(f"Fixed L2 failed to converge holding out {held_family}")
+            config = {
+                "features": features, "feature_panel": "raw7", "C": 1.0,
+                "l1_ratio": 0.0, "selection_status": "prespecified_fixed_no_tuning",
+                "inner_cv_score": np.nan,
+            }
+            fit_status = "fixed_l2_fit_converged"
+        elif loso_model == "nested_regularized_prespecified":
+            args = _selection_args(
+                inner_folds=inner_folds, seed=seed + family_index * 10000,
+                metric=selection_metric, c_grid=c_grid, l1_grid=l1_grid,
+            )
+            config, tuning = _select_configuration(
+                train, train, train["label"].astype(int), train["prefixed_group_id"],
+                args, family=train["study_family"],
+            )
+            weights = _family_class_balanced_weights(train["label"], train["study_family"])
+            model, config, fit_status = _fit_selected_with_fallback(
+                train, train, train["label"].astype(int), config, tuning,
+                random_state=seed + family_index, sample_weight=weights,
+            )
+            features = list(config["features"])
+            tuning.assign(held_out_family=held_family).to_csv(
+                output_dir / f"loso_tuning_holdout_{held_family}.csv", index=False
+            )
+        else:
+            raise ValueError(f"Unknown --loso-model {loso_model}")
         selection_rows.append({
             "held_out_family": held_family, "n_train": len(train),
             "n_train_families": int(train["study_family"].nunique()),
@@ -527,7 +570,7 @@ def run_loso(
             prediction_rows.append(pred)
             add_metric_row(
                 metric_rows, pred.rename(columns={"supervised_score": "_score"}), "_score",
-                model_name="loso_regularized_prespecified",
+                model_name="loso_" + loso_model,
                 dataset_id=spec.dataset_id, analysis_variant=spec.analysis_variant,
                 evaluation="leave_one_study_family_out", n_boot=bootstrap,
                 seed=seed + 500000 + len(metric_rows) * 101,
@@ -571,7 +614,7 @@ def run_supervised_benchmark(args) -> None:
         specs, data, output_dir, inner_folds=int(args.inner_folds),
         selection_metric=str(args.selection_metric), c_grid=str(args.c_grid),
         l1_grid=str(args.l1_ratio_grid), bootstrap=int(args.bootstrap),
-        seed=int(args.seed),
+        seed=int(args.seed), loso_model=str(args.loso_model),
     )
     outputs = {
         "same_study_nested_metrics.csv": same_metrics,
@@ -591,6 +634,7 @@ def run_supervised_benchmark(args) -> None:
         "selection_metric": str(args.selection_metric),
         "c_grid": str(args.c_grid), "l1_ratio_grid": str(args.l1_ratio_grid),
         "bootstrap": int(args.bootstrap), "seed": int(args.seed),
+        "loso_model": str(args.loso_model),
         "same_study_min_positive": int(args.same_study_min_positive),
         "same_study_min_negative": int(args.same_study_min_negative),
         "feature_panels": {"raw7": RAW7_FEATURES, "routes6": ROUTE6_FEATURES},
