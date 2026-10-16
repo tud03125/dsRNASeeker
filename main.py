@@ -10,6 +10,7 @@ from modules.zrna import run_zrna
 from modules.molecule_model import run_molecule_model
 from modules.workflow import run_workflow
 from modules.supervised_benchmark import run_supervised_benchmark
+from modules.supervised_transfer import add_supervised_transfer_args, run_transfer
 from modules.robustness import run_robustness
 
 def add_execs(p: argparse.ArgumentParser) -> None:
@@ -378,6 +379,9 @@ def add_supervised_benchmark_args(p: argparse.ArgumentParser) -> None:
     p.add_argument('--same-study-min-negative', type=int, default=10)
     p.add_argument('--bootstrap', type=int, default=2000)
     p.add_argument('--seed', type=int, default=20260728)
+    p.add_argument('--loso-model', choices=['fixed_l2_raw7', 'nested_regularized_prespecified'],
+                   default='fixed_l2_raw7',
+                   help='Fixed L2 seven-component transfer; nested elastic-net is exploratory.')
 
 
 
@@ -417,6 +421,8 @@ def build_parser() -> argparse.ArgumentParser:
     add_molecule_model_args(moleculep)
     supervisedp = sub.add_parser('supervised-benchmark', help='Run manifest-driven nested grouped and leave-one-study-family-out supervised evaluation.')
     add_supervised_benchmark_args(supervisedp)
+    transferp = sub.add_parser('supervised-transfer', help='Native directed and source-only study transfer')
+    add_supervised_transfer_args(transferp)
     robustp = sub.add_parser('robustness', help='Build label-free ranking-robustness diagnostics from an existing summary; does not rerun alignment, coverage, energetics, editing, or pairing.')
     add_robustness_args(robustp)
     return parser
@@ -425,7 +431,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
-    if args.command not in {'supervised-benchmark', 'robustness'}:
+    if args.command not in {'supervised-benchmark', 'supervised-transfer', 'robustness'}:
         if getattr(args, 'rmats_group1_label', None) is None:
             args.rmats_group1_label = args.case_label
         if getattr(args, 'rmats_group2_label', None) is None:
@@ -444,6 +450,8 @@ def main() -> None:
         run_molecule_model(args)
     elif args.command == 'supervised-benchmark':
         run_supervised_benchmark(args)
+    elif args.command == 'supervised-transfer':
+        run_transfer(args)
     elif args.command == 'robustness':
         run_robustness(args)
     elif args.command == 'check':
