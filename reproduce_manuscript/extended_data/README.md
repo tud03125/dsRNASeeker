@@ -1,37 +1,15 @@
-# dsRNASeeker extended benchmark data
+# dsRNASeeker — Bioinformatics Extended Data, manuscript supporting data (November 2026)
 
-These files contain secondary benchmark diagnostics retained for
-reproducibility but not presented as formatted Supplementary Tables
-in the reader-facing manuscript.
+Data S1 contains **96 rows**, including 36 corrected primary-study top-k rows (three current studies, six methods, K=10/20) and 60 preserved earlier secondary-study rows (six separate historical analysis variants, five methods, K=10/20). The `source_lineage` column distinguishes these. A difference in label definitions or method panels across cohorts must not be mistaken for a unified independent validation. Primary ADPS FLAG P@10/P@20 = 0.90/0.70.
 
-## Data S1
-`DataS1_tie_aware_precision_at_k.csv`
+Data S2 retains **all nine** original rows byte-for-byte: the three principal records agree with the October corrected/rechecked source for matched counts, class counts, prevalence, odds ratio and Fisher p. The other six are historically archived and were not independently rechecked by the newer three-study source.
 
-Tie-aware expected Precision@10 and Precision@20 for primary
-dsRNASeeker and projected comparator scores. The expected value
-averages over possible orderings when the top-k boundary intersects
-a score tie.
+Data S3 (eight Z22 5-kb case-specific evidence rows) and Data S4 (three FLAG candidate-generation radius rows) are byte-identical to the original upload and validated against anchor values.
 
-## Data S2
-`DataS2_dsRNAscan_binary_enrichment.csv`
+The primary source CSVs are preserved byte-for-byte outside extended_data in 90_SOURCE_PROVENANCE/. No source-only or LOSO benchmarks are included. The separate current Figure S1/Table S2 historical noNullZ radius sensitivity and 20-edge directed transfers already have their own supplementary figure/table locations.
 
-Matched-versus-unmatched enrichment analysis for the binary
-dsRNAscan two-arm comparator within each frozen labeled benchmark
-universe.
+Primary and historical secondary benchmark cohorts are distinguished by their documented source lineage. Historical secondary results should not be interpreted as the current principal benchmark results.
 
-## Data S3
-`DataS3_GSE184962_evidence_direction.csv`
 
-Feature-wise AP, ROC-AUC, grouped-bootstrap confidence intervals,
-and association direction for the GSE184962/4 5-kb Z22 benchmark.
-These values underlie Figure S3.
-
-## Data S4
-`DataS4_FLAG_candidate_generation_capture.tsv`
-
-Candidate-generation capture of the 158 published GSE308488
-FLAG-ZBP1-positive source clusters at 1-, 2-, and 5-kb TE-pair
-search radii, evaluated before ADPS ranking.
-
-These analyses are secondary diagnostics and are provided to support
-complete reproduction and audit of the manuscript analyses.
+## Data S5 — Benchmark sensitivity and statistical comparisons
+Data S5 (`DataS5_benchmark_sensitivity_and_statistical_comparisons.xlsx`) contains named worksheets. Data S1–S4 retain their original bytes. Detailed candidate-level inputs, sequence records and scripts are retained separately in the reproducibility archive. The radius-series J2 values use the same principal label cohort, but distinct no-shuffle scores. FLAG and Z22 radius-series performance is reproduced from the earlier Table S2 at its reported precision.

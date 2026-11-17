@@ -1,5 +1,23 @@
 # Benchmark and manuscript reproduction
 
+## Current manuscript benchmark materials
+
+The November 2026 manuscript uses the updated statistical comparisons,
+individual-channel baselines, fixed-cohort radius analysis, sequence-screened
+cross-study transfers and genomic-orientation sensitivity results.
+
+The current reproduction instructions are in:
+
+`reproduce_manuscript/benchmark_sensitivity/README.md`
+
+Current Figure 2 and Figure S1 files are named `Figure2_FINAL.*` and
+`FigureS1_FINAL.*` under `reproduce_manuscript/figures/`.
+
+Extended Data S1-S5 are in `reproduce_manuscript/extended_data/`.
+
+The earlier grouped-fold Figure 2 analysis is retained for
+historical reproducibility and is not the current manuscript figure.
+
 This document describes the frozen manuscript-facing reproduction bundle.
 
 ## Principal labeled benchmarks
