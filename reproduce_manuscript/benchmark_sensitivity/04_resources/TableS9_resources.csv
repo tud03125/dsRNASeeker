@@ -1,0 +1,2 @@
+job_id,study,genome,samples,case_n,control_n,read_layout,read_length_bp,input,selection_mode,radius_bp,candidates,allocated_cpus,elapsed,elapsed_seconds,batch_maxrss_kib,retained_bytes,TE_regenerated,STAR_index,NullZ,IntaRNA,source
+284584,GSE184962,mm10,8,4,4,paired-end,151,FASTQ,expressed,1000,16,8,2-03:47:10,186430,28030664,93247303680,yes,prebuilt,disabled,disabled,FCCC sacct and du -sB1 captured in user terminal record 2026-11-14; disk is retained footprint not peak; historical job August 7-9 2026
