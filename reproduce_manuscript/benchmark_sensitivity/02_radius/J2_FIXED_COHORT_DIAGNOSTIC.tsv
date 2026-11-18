@@ -1,0 +1,5 @@
+radius_bp	source	candidate_n	labeled_positive	labeled_negative	missing_principal_labels	AP	ROC_AUC	max_abs_score_difference_from_principal	identical_scores
+1000	principal	14089	642	575	0	0.658499901665879	0.6184152783421373	0.0	True
+1000	cached_noNullZ_fixed_cohort_DIAGNOSTIC	14089	642	575	0	0.6755579570068209	0.6351239333604226	0.051223543343345904	False
+2000	cached_noNullZ_fixed_cohort_DIAGNOSTIC	24333	642	575	0	0.6760882865079478	0.6365352837599891	0.052782702398592424	False
+5000	cached_noNullZ_fixed_cohort_DIAGNOSTIC	44210	642	575	0	0.6749107177542608	0.6344548286604361	0.05080896978224392	False

@@ -1,0 +1,4 @@
+dataset_id	window_bp	n_positive_clusters	n_captured_by_candidate_arm	candidate_arm_capture_fraction	n_captured_by_pair_span	pair_span_capture_fraction	n_candidate_pairs	positive_unit
+GSE308488_FLAG_ZBP1_w1000	1000	158	11	0.0696202531645569	11	0.0696202531645569	878	unique author cluster ID; split BED blocks grouped before capture
+GSE308488_FLAG_ZBP1_w2000	2000	158	12	0.0759493670886076	12	0.0759493670886076	1852	unique author cluster ID; split BED blocks grouped before capture
+GSE308488_FLAG_ZBP1_w5000	5000	158	16	0.1012658227848101	19	0.120253164556962	5455	unique author cluster ID; split BED blocks grouped before capture

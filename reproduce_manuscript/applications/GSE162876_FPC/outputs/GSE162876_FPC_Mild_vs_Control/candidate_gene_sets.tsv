@@ -1,0 +1,4 @@
+candidate_set	n_genes_in_ranked_universe	genes
+dsRNASeeker_all_candidate_genes	6	Pde4d;Samm50;Gm33429;Gm33543;Gm15998;Rdh16f2
+dsRNASeeker_priority_top20_genes	6	Pde4d;Samm50;Gm33429;Gm33543;Gm15998;Rdh16f2
+dsRNASeeker_structure_top20_genes	6	Gm33543;Gm15998;Samm50;Rdh16f2;Gm33429;Pde4d

@@ -1,0 +1,10 @@
+n_labeled,n_positive,prevalence,matched_n,matched_positive,matched_negative,matched_positive_rate,fold_enrichment_vs_prevalence,fisher_odds_ratio,fisher_p_two_sided,dataset_id,analysis_variant,method,score_column
+127,75,0.5905511811023622,13,6,7,0.4615384615384615,0.7815384615384616,0.5590062111801242,0.3782726524102767,GSE308489,w1000_standardized,dsRNAscan_two_arm,dsrnascan_two_arm_match
+8,5,0.625,1,0,1,0.0,0.0,0.0,0.375,GSE184962_4,w1000_standardized,dsRNAscan_two_arm,dsrnascan_two_arm_match
+58,20,0.3448275862068966,5,1,4,0.2,0.58,0.4473684210526316,0.6501965467482709,GSE184962_4,w5000_expanded,dsRNAscan_two_arm,dsrnascan_two_arm_match
+1217,642,0.5275267050123253,363,263,100,0.7245179063360881,1.3734241308582855,3.296174142480211,1.261854261204257e-19,GSE244103,w1000_standardized,dsRNAscan_two_arm,dsrnascan_two_arm_match
+104,65,0.625,15,13,2,0.8666666666666667,1.3866666666666667,4.625,0.0447056969503832,GSE220315,frozen_august,dsRNAscan_two_arm,dsrnascan_two_arm_match
+683,444,0.6500732064421669,182,146,36,0.8021978021978022,1.234011484011484,2.762677106636838,3.0972642958352695e-07,GSE244104,frozen_august,dsRNAscan_two_arm,dsrnascan_two_arm_match
+71,18,0.2535211267605634,4,0,4,0.0,0.0,0.0,0.5660222202781908,GSE293278,frozen_august,dsRNAscan_two_arm,dsrnascan_two_arm_match
+18,4,0.2222222222222222,2,0,2,0.0,0.0,0.0,1.0,GSE307540,frozen_august,dsRNAscan_two_arm,dsrnascan_two_arm_match
+311,3,0.0096463022508038,28,1,27,0.0357142857142857,3.702380952380952,5.203703703703703,0.2472317358208219,GSE267104,prospective_primary,dsRNAscan_two_arm,dsrnascan_two_arm_match

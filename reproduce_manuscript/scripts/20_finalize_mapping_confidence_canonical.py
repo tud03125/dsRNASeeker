@@ -66,7 +66,7 @@ def main():
     axes[0].set_title('A  Ranking performance',loc='left')
     axes[1].set_title('B  Discrimination performance',loc='left')
     handles,labels=axes[0].get_legend_handles_labels()
-    fig.suptitle('ADPS sensitivity to stringent arm-level mapping confidence',y=.98,fontsize=15)
+    fig.suptitle('ADPS benchmark performance after stringent mapping-confidence filtering',y=.98,fontsize=15)
     fig.legend(handles,labels,loc='upper center',bbox_to_anchor=(.5,.925),ncol=2,frameon=False)
     fig.subplots_adjust(left=.08,right=.985,top=.82,bottom=.17,wspace=.18)
     for ext in ['png','pdf','svg']:

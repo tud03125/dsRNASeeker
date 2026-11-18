@@ -1,0 +1,3 @@
+[INFO] GSE184962/4 full-from-FASTQ corrected structure-v2 run
+[dsRNASeeker] Step 2/6 TE analysis: running atena/qtex + DESeq2 + ChIPseeker
+[dsRNASeeker] [OK] workflow complete: historical_project_archive/dsRNASeeker_structure_model_v2_window_sensitivity/GSE184962_4/expressed_w1000_noNullZ

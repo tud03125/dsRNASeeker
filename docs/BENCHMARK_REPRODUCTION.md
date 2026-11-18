@@ -1,5 +1,23 @@
 # Benchmark and manuscript reproduction
 
+## Current manuscript benchmark materials
+
+The November 2026 manuscript uses the updated statistical comparisons,
+individual-channel baselines, fixed-cohort radius analysis, sequence-screened
+cross-study transfers and genomic-orientation sensitivity results.
+
+The current reproduction instructions are in:
+
+`reproduce_manuscript/benchmark_sensitivity/README.md`
+
+Current Figure 2 and Figure S1 files are named `Figure2_FINAL.*` and
+`FigureS1_FINAL.*` under `reproduce_manuscript/figures/`.
+
+Extended Data S1-S5 are in `reproduce_manuscript/extended_data/`.
+
+The earlier grouped-fold Figure 2 analysis is retained for
+historical reproducibility and is not the current manuscript figure.
+
 This document describes the frozen manuscript-facing reproduction bundle.
 
 ## Principal labeled benchmarks
@@ -50,9 +68,13 @@ Final rendered figures are supplied in `reproduce_manuscript/figures/`.
 
 ## Public-data provenance
 
-Public sequence data are identified by GEO accessions in the manuscript and benchmark
-registry. The in-house mouse-liver RNA-seq accession must be inserted here and in the
-manuscript Data Availability Statement once deposition is complete.
+All sequencing datasets used in the manuscript are publicly available through
+their cited GEO/SRA accessions. The public mouse-liver FPC application uses
+GSE162876, part of SuperSeries GSE162878. Frozen inputs, candidate summaries,
+analysis outputs, sample provenance, and figure-source files for this application
+are archived under:
+
+`reproduce_manuscript/applications/GSE162876_FPC/`
 
 ## Scope of the smoke test
 

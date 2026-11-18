@@ -1,0 +1,7 @@
+study,orientation,candidates,positives,negatives,unlabeled
+FLAG_308489,direct,140,0,1,139
+FLAG_308489,inverted,738,75,51,612
+J2_244103,direct,226,14,10,202
+J2_244103,inverted,13863,628,565,12670
+Z22_184962,direct,39,17,4,18
+Z22_184962,inverted,78,3,34,41

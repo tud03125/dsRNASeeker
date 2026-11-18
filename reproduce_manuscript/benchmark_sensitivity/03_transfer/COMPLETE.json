@@ -1,0 +1,12 @@
+{
+  "source_manifest_sha256": "a639e1ee34704b2b65bcfbaa3435bc230db6c00fe5eb9e0a66251e8d942408c5",
+  "prediction_file_sha256": "24a91edeea2ca095c9a2b3a30657a851c727de9e8b28c5520901c4dfaac2f6bd",
+  "n_directed": 20,
+  "n_evaluable_after_screen": 20,
+  "blast_executed": true,
+  "arm_status_counts": {
+    "OK": 3088,
+    "SHORT_ARM_EXACT_ONLY": 4
+  },
+  "definition": "Either test arm exact (including reverse complement) or one BLAST HSP >=90% identity and >=80% coverage of both arm sequences. Missing source sequences block clearance. Short test arms remain unresolved unless matched. Short source arms do not block a long target where 90% identity and 80% target coverage are mathematically impossible by length (0.72*target length > short length). Fixed archived predictions, no retraining. Heuristic screen, not proof of absence of all homology."
+}

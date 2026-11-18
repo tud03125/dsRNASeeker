@@ -1,0 +1,14 @@
+{
+  "seed": 20261114,
+  "requested_bootstrap": 5000,
+  "groups_primary": "Union of benchmark-assigned groups and shared TE arms across complete candidate set, before restricting to labeled pairs",
+  "group_sensitivity": "benchmark group_id alone",
+  "inferential_scope": "paired fixed-score cluster bootstrap, pointwise percentile 95% CI; approximate centered-bootstrap two-sided p, Holm over 12 ADPS vs EER/two-arm dsRNAscan endpoints within each group scheme; expression comparison exploratory, no Holm value",
+  "strict_subset": "restricted evaluation of existing scores and OOF predictions; no refitting or recalculation of ADPS weights",
+  "baseline": "constant score; AP positive prevalence, AUC 0.5; not simulated random permutation",
+  "input_sha256": {
+    "Z22_184962.csv.gz": "f5ed4a507e58cfcf0337949a96e710ed01c5e9b06613e5576302ecb226923b73",
+    "FLAG_308489.csv.gz": "d890a8d05454fbb3013ab44dd94956806986f5ee4f79e8af7a0dc354a03ec6bd",
+    "J2_244103.csv.gz": "24ba8e7ef3b18cfe240bfaf1774eba1f66ff4f83f4ecb234880fa53095c98b5a"
+  }
+}

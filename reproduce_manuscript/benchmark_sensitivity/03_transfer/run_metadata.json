@@ -1,0 +1,22 @@
+{
+  "entrypoint": "python main.py supervised-transfer",
+  "model_function": "modules.supervised._model + _fit_checked",
+  "model_source": "historical_work_archive/dsRNASeeker_2/modules/supervised.py",
+  "model_sha256": "ab519885d3746e56ee99ba870bccf9fb86cd68b05411e16b73d8b252fb380601",
+  "transfer_module_source": "historical_work_archive/dsRNASeeker_2/modules/supervised_transfer.py",
+  "transfer_module_sha256": "c0d13cccbca06422d8006342639ea39dc79f8760e531fd615d60c1389ca7ce74",
+  "manifest": "historical_project_archive/dsRNASeeker_major_revision_20260925/reproducibility_gate_20261011_20261011T164319Z_1035537/manifests/FLAG_source_closeout_20261011T232313Z_1129594/source/grid5_FLAG_verified_source_manifest.tsv",
+  "manifest_sha256": "a639e1ee34704b2b65bcfbaa3435bc230db6c00fe5eb9e0a66251e8d942408c5",
+  "mode": "both",
+  "n_studies": 5,
+  "seed": 20261011,
+  "bootstrap": 0,
+  "python_library": "3.11.15",
+  "sklearn": "1.9.0",
+  "pandas": "3.0.3",
+  "study_selection": "source families only; no outer target labels until evaluation",
+  "biological_data_edited": false,
+  "original_adps_fabricated": false,
+  "interpretation": "Previously inspected cohorts: retrospective development, not fresh validation",
+  "note": "Direct-study transfer, source-only selected transfer and pooled LOSO are different estimands"
+}

@@ -1,0 +1,77 @@
+[
+  {
+    "study": "FLAG_308489",
+    "principal_file": "historical_project_archive/dsRNASeeker_major_revision_20260925/reproducibility_gate_20261011_20261011T164319Z_1035537/manifests/FLAG_source_closeout_20261011T232313Z_1129594/Oxford_Figures_Tables_v104_SINGLE_FOLDER/08_LABEL_FREE_ROBUSTNESS_REVIEW/frozen_source_extract/dsRNASeeker_v1.0.4_manuscript_data/data/principal_audit/FLAG_308489__FLAG_verified_source_rebuilt.audit.tsv",
+    "principal_sha256": "d2391204a84ecab78f0a634f78f8b94f629ab7b5ee4682c21896135e6f2a7cdf",
+    "orientation_file": "historical_project_archive/dsRNASeeker_major_revision_20260925/reproducibility_gate_20261011_20261011T164319Z_1035537/manifests/FLAG_source_closeout_20261011T232313Z_1129594/Oxford_Figures_Tables_v104_SINGLE_FOLDER/08_LABEL_FREE_ROBUSTNESS_REVIEW/forensic_followup_20261030_1193337/FLAG_308489_orientation/candidate_impact_all.csv",
+    "orientation_sha256": "4dd0c689723bd891d243d0e9b5f00d5e3de9d93e8e41bc11d627b2bbde721626",
+    "comparator_file": "historical_work_archive/all_method_candidate_scores_original.tsv.gz",
+    "comparator_sha256": "7a670b61e77a32aa6266fc5d31d0261a085671ecf52b6b92065377e6f1831531",
+    "repository_module_sha256": "148971299f425a156128a5805f0fcef75863a7a3c1d7a54b0eb3fb32906dddd5",
+    "supervised_module_sha256": "ab519885d3746e56ee99ba870bccf9fb86cd68b05411e16b73d8b252fb380601",
+    "sklearn": "1.9.0",
+    "seed": 20260728,
+    "external_adps_max_delta": 0.005329957824939613,
+    "external_group_mismatch_labeled": 0,
+    "principal_reproduced_metrics": [
+      0.7901666148270705,
+      0.7703846153846153,
+      0.7475578955957166,
+      0.7348717948717949,
+      0.6120034995625547,
+      0.5164102564102564,
+      0.5802301635372501,
+      0.47269230769230774
+    ]
+  },
+  {
+    "study": "J2_244103",
+    "principal_file": "historical_project_archive/dsRNASeeker_major_revision_20260925/reproducibility_gate_20261011_20261011T164319Z_1035537/manifests/FLAG_source_closeout_20261011T232313Z_1129594/Oxford_Figures_Tables_v104_SINGLE_FOLDER/08_LABEL_FREE_ROBUSTNESS_REVIEW/frozen_source_extract/dsRNASeeker_v1.0.4_manuscript_data/data/principal_audit/J2_244103__GSE244103__w1000_standardized.audit.grouped.tsv",
+    "principal_sha256": "3ed486cacde889909cf52b6162cd3c3eb525252af8d1b7c6687abaaf1d2b0304",
+    "orientation_file": "historical_project_archive/dsRNASeeker_major_revision_20260925/reproducibility_gate_20261011_20261011T164319Z_1035537/manifests/FLAG_source_closeout_20261011T232313Z_1129594/Oxford_Figures_Tables_v104_SINGLE_FOLDER/08_LABEL_FREE_ROBUSTNESS_REVIEW/forensic_followup_20261030_1193337/J2_244103_orientation/candidate_impact_all.csv",
+    "orientation_sha256": "67f80f270623d9abcccacefe8bcf7f8e91f9b2ab48eccc6286d6af6be28f8aaf",
+    "comparator_file": "historical_work_archive/all_method_candidate_scores_original.tsv.gz",
+    "comparator_sha256": "7a670b61e77a32aa6266fc5d31d0261a085671ecf52b6b92065377e6f1831531",
+    "repository_module_sha256": "148971299f425a156128a5805f0fcef75863a7a3c1d7a54b0eb3fb32906dddd5",
+    "supervised_module_sha256": "ab519885d3746e56ee99ba870bccf9fb86cd68b05411e16b73d8b252fb380601",
+    "sklearn": "1.9.0",
+    "seed": 20260728,
+    "external_adps_max_delta": 0.0,
+    "external_group_mismatch_labeled": 1217,
+    "principal_reproduced_metrics": [
+      0.658499901665879,
+      0.6184152783421373,
+      0.6765231705969241,
+      0.6772992008668564,
+      0.592635836276866,
+      0.5783082757686578,
+      0.6082255927820288,
+      0.6178721386970067
+    ]
+  },
+  {
+    "study": "Z22_184962",
+    "principal_file": "historical_project_archive/dsRNASeeker_major_revision_20260925/reproducibility_gate_20261011_20261011T164319Z_1035537/manifests/FLAG_source_closeout_20261011T232313Z_1129594/Oxford_Figures_Tables_v104_SINGLE_FOLDER/08_LABEL_FREE_ROBUSTNESS_REVIEW/frozen_source_extract/dsRNASeeker_v1.0.4_manuscript_data/data/principal_audit/Z22_184962_specific__GSE184962_4__w5000_expanded.audit.grouped.tsv",
+    "principal_sha256": "1c1f22400c1bc036a4787f69c1a1e84cf4973f195a019dfa63943d0a1f73acd0",
+    "orientation_file": "historical_project_archive/dsRNASeeker_major_revision_20260925/reproducibility_gate_20261011_20261011T164319Z_1035537/manifests/FLAG_source_closeout_20261011T232313Z_1129594/Oxford_Figures_Tables_v104_SINGLE_FOLDER/08_LABEL_FREE_ROBUSTNESS_REVIEW/forensic_followup_20261030_1193337/Z22_184962_orientation/candidate_impact_all.csv",
+    "orientation_sha256": "d8f4b850071b7897bc91ee6b414a6dae79d604737a98f6bc774f0ed44e11206d",
+    "comparator_file": "historical_work_archive/all_method_candidate_scores_original.tsv.gz",
+    "comparator_sha256": "7a670b61e77a32aa6266fc5d31d0261a085671ecf52b6b92065377e6f1831531",
+    "repository_module_sha256": "148971299f425a156128a5805f0fcef75863a7a3c1d7a54b0eb3fb32906dddd5",
+    "supervised_module_sha256": "ab519885d3746e56ee99ba870bccf9fb86cd68b05411e16b73d8b252fb380601",
+    "sklearn": "1.9.0",
+    "seed": 20260728,
+    "external_adps_max_delta": 0.0,
+    "external_group_mismatch_labeled": 0,
+    "principal_reproduced_metrics": [
+      0.28271765454689024,
+      0.3671052631578947,
+      0.9295101590749858,
+      0.9447368421052631,
+      0.3448275862068966,
+      0.5,
+      0.3375862068965517,
+      0.4723684210526316
+    ]
+  }
+]
