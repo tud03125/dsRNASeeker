@@ -545,7 +545,7 @@ def benchmark_page():
         values=metric,
     )
 
-    st.bar_chart(chart)
+    st.bar_chart(chart, stack=False)
 
     st.dataframe(
         s[[
@@ -592,10 +592,33 @@ def benchmark_page():
         )
 
     with st.expander("Search-radius sensitivity"):
+        radius = load_table(
+            "02_radius/TableS2_radius_metrics.csv"
+        ).copy()
+
+        radius["score_source"] = radius["score_source"].replace({
+            "Prior Table S2 (rounded to 3 decimals)":
+                "Radius-specific benchmark",
+            "Previously completed FCCC fixed-cohort diagnostic":
+                "Fixed-cohort benchmark",
+        })
+
+        radius = radius.rename(
+            columns={"score_source": "Evaluation basis"}
+        )
+
         st.dataframe(
-            load_table("02_radius/TableS2_radius_metrics.csv"),
+            radius,
             hide_index=True,
             use_container_width=True,
+        )
+
+        st.caption(
+            "All radii were evaluated without the "
+            "dinucleotide-shuffle null model. "
+            "FLAG-ZBP1 and Z22 use radius-specific labels, "
+            "whereas J2 uses the same 642 positive and "
+            "575 confident-negative pairs at all three radii."
         )
 
     with st.expander("Cross-study transfer"):
