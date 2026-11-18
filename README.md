@@ -6,7 +6,7 @@
 
 ## Web Explorer
 
-Public HTTPS application: https://dsrnaseeker-kvqciapfzxrodulzmpdyb9.streamlit.app/
+Public HTTPS application: https://dsrnaseeker.streamlit.app/
 
 ## What dsRNASeeker integrates
 
