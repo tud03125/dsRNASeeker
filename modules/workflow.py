@@ -128,10 +128,14 @@ def _common_run_args(args, samplesheet_bam: Path, csv_in: Path, redit_dir: Path 
         rnafold_exe=args.rnafold_exe,
         intarna_exe=args.intarna_exe,
         min_selected_candidates=args.min_selected_candidates,
+        threads=getattr(args, "threads", 1),
     )
 
 
 def run_workflow(args) -> None:
+    from .intarna_checked import preflight_intarna
+    if args.do_intarna:
+        preflight_intarna(args.intarna_exe)
     outdir = ensure_dir(args.output_dir)
     args.output_dir = str(outdir)
     _write_versions(args, outdir)

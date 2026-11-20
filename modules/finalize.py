@@ -10,7 +10,7 @@ def finalize_condition(outdir, pairs, txmap_path, tag, condition, args):
     strand=pd.read_csv(outdir/f'pair_windows_strand_signal.{tag}.{condition}.tsv', sep='\t')
     cofold_path=outdir/f'duplex_pairs.{tag}.{condition}.cofold_mfe.tsv'
     ddg_path=outdir/f'duplex_pairs.{tag}.{condition}.ddg.tsv'
-    mfe=pd.read_csv(ddg_path if ddg_path.exists() else cofold_path, sep='\t')
+    mfe=pd.read_csv(ddg_path if getattr(args, "do_ddg", True) and ddg_path.exists() else cofold_path, sep='\t')
     AtoI_fn=outdir/f'AtoI_counts_window.{tag}.{condition}.tsv'; REDI_fn=outdir/f'REDI_counts_window.{tag}.{condition}.tsv'
     AtoI=pd.read_csv(AtoI_fn, sep='\t') if AtoI_fn.exists() else pd.DataFrame(columns=['pair_id','AtoI_hits_window'])
     REDI=pd.read_csv(REDI_fn, sep='\t') if REDI_fn.exists() else pd.DataFrame(columns=['pair_id','REDI_hits_window'])
@@ -35,7 +35,9 @@ def finalize_condition(outdir, pairs, txmap_path, tag, condition, args):
     if 'transcript_orientation' not in meta.columns:
         meta['transcript_orientation'] = meta['genomic_orientation']
     X=strand.merge(mfe, on='pair_id', how='left').merge(meta[['pair_id','A_TE_id','B_TE_id','A_repFamily','A_repName','B_repFamily','B_repName','A_SYMBOL','B_SYMBOL','A_annotation','B_annotation','genomic_orientation','transcript_orientation']], on='pair_id', how='left').merge(AtoI, on='pair_id', how='left').merge(REDI, on='pair_id', how='left')
-    for opt in ['nullZ','interface_bpp','IntaRNA']:
+    for opt, enabled in [('nullZ', getattr(args, 'do_null_z', False) and getattr(args, 'do_ddg', True)), ('interface_bpp', getattr(args, 'do_pf_interface', False)), ('IntaRNA', getattr(args, 'do_intarna', False))]:
+        if not enabled:
+            continue
         p=outdir/f'duplex_pairs.{tag}.{condition}.{opt}.tsv'
         if p.exists(): X=X.merge(pd.read_csv(p, sep='\t'), on='pair_id', how='left')
     arms_path=outdir/f'pair_arms_signal.{tag}.{condition}.tsv'

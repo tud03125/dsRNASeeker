@@ -432,24 +432,7 @@ def run_null_z(args, clean_fa, ddg_tsv, outdir, tag, condition):
     _write_tsv_atomic(pd.DataFrame(rows), out)
     return out
 
+# Optional ancillary prediction, with fail-closed executable and cache validation.
 def run_intarna(args, clean_fa, outdir, tag, condition):
-    outdir=Path(outdir)
-    expected_n = _expected_complete_pair_count(clean_fa)
-    out=outdir/f'duplex_pairs.{tag}.{condition}.IntaRNA.tsv'
-    required_cols = ['pair_id','E']
-    if _valid_tsv(out, required_cols=required_cols, min_rows=expected_n):
-        print(f"[SKIP] Existing valid IntaRNA file found: {out}")
-        return out
-
-    pairs=_load_pairs_from_clean_fasta(clean_fa); rows=[]
-    for pid,ab in pairs.items():
-        if 'A' not in ab or 'B' not in ab: continue
-        try:
-            proc=subprocess.run([args.intarna_exe, '--query', ab['A'], '--target', ab['B'], '--outMode', 'C', '--outCsvCols', 'E'], text=True, capture_output=True, check=True)
-            val=proc.stdout.strip().splitlines()[-1].strip()
-            energy=float(val) if val not in ('','E') else np.nan
-        except Exception:
-            energy=np.nan
-        rows.append({'pair_id':pid,'E':energy})
-    _write_tsv_atomic(pd.DataFrame(rows), out)
-    return out
+    from .intarna_checked import run_intarna_checked
+    return run_intarna_checked(args, clean_fa, outdir, tag, condition)

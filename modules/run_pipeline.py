@@ -12,6 +12,15 @@ from .finalize import finalize_condition
 
 
 def run_pipeline(args) -> None:
+    from .intarna_checked import preflight_intarna
+    if args.do_intarna:
+        preflight_intarna(args.intarna_exe)
+    # Execution-only optimization is opt-in until real-tool regression is complete.
+    import os
+    if os.environ.get("DSRNA_STRUCT_OPT", "0") == "1":
+        from .structure_execute import run_rnacofold, run_ddg, run_interface_bpp
+    else:
+        from .energetics import run_rnacofold, run_ddg, run_interface_bpp
     samples=read_samplesheet(args.samplesheet)
     if args.condition not in {args.case_label, args.control_label}:
         raise ValueError(f'--condition must match --case-label or --control-label; got {args.condition}')
