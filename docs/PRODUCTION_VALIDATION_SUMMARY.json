@@ -1,0 +1,6 @@
+{
+  "baseline_commit": "e6726217a610f40e942924f2588f9c590bc35f5f",
+  "validation": "FCC and clean Linux environment: unit tests, CLI import, ADPS fixture invariance, real-tool structural equivalence and IntaRNA smoke",
+  "scope": "not a whole FASTQ workflow or full benchmark revalidation",
+  "explicit_lock_sha256": "6a450d525f598e16a53ef1a2416c1e910ccea32ed768a2cf5a5d402f032fda72"
+}
