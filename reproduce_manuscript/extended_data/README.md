@@ -12,4 +12,4 @@ Primary and historical secondary benchmark cohorts are distinguished by their do
 
 
 ## Data S5 — Benchmark sensitivity and statistical comparisons
-Data S5 (`DataS5_benchmark_sensitivity_and_statistical_comparisons.xlsx`) contains named worksheets. Data S1–S4 retain their original bytes. Detailed candidate-level inputs, sequence records and scripts are retained separately in the reproducibility archive. The radius-series J2 values use the same principal label cohort, but distinct no-shuffle scores. FLAG and Z22 radius-series performance is reproduced from the earlier Table S2 at its reported precision.
+Data S5 (`DataS5_benchmark_sensitivity_and_statistical_comparisons.xlsx`) contains named worksheets. Data S1–S4 retain their original bytes. Detailed candidate-level inputs, sequence records and scripts are retained separately in the reproducibility archive. The radius-series J2 results use radius-specific labeled cohorts and a matched historical no-Null-Z scoring configuration. FLAG and Z22 radius-series performance is reproduced from the earlier Table S2 at its reported precision.

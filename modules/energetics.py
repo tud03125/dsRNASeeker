@@ -339,7 +339,7 @@ def _dinuc_shuffle_exact(seq: str, rng: random.Random) -> str:
     return shuffled
 
 
-def run_null_z(args, clean_fa, ddg_tsv, outdir, tag, condition):
+def _run_null_z_legacy(args, clean_fa, ddg_tsv, outdir, tag, condition):
     """
     Exact dinucleotide-preserving null for ddG. Shuffled monomer MFEs are
     recomputed for every null sequence before ddG is calculated.
@@ -436,3 +436,9 @@ def run_null_z(args, clean_fa, ddg_tsv, outdir, tag, condition):
 def run_intarna(args, clean_fa, outdir, tag, condition):
     from .intarna_checked import run_intarna_checked
     return run_intarna_checked(args, clean_fa, outdir, tag, condition)
+
+
+def run_null_z(args, clean_fa, ddg_tsv, outdir, tag, condition):
+    """Provenance-checked execution of the unchanged dinucleotide null model."""
+    from .nullz_checked import run_nullz_checked
+    return run_nullz_checked(args, clean_fa, ddg_tsv, outdir, tag, condition)

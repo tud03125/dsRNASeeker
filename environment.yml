@@ -30,7 +30,7 @@ dependencies:
   - deeptools>=3.5,<4
   - bwa>=0.7.17
   - viennarna>=2.7,<2.8
-  - intarna>=1.2,<2
+  - intarna=3.4.1
 
   # R / Bioconductor packages used directly by bundled R helpers
   - r-data.table
