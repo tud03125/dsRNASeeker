@@ -2,9 +2,9 @@ study,radius_bp,candidate_n,positive,negative,AP,ROC_AUC,cohort,configuration,sc
 FLAG-ZBP1,1000,878,75,52,0.756,0.762,Radius-specific labels,No dinucleotide-shuffle null model,Prior Table S2 (rounded to 3 decimals)
 FLAG-ZBP1,2000,1852,75,52,0.756,0.762,Radius-specific labels,No dinucleotide-shuffle null model,Prior Table S2 (rounded to 3 decimals)
 FLAG-ZBP1,5000,5455,75,52,0.668,0.641,Radius-specific labels,No dinucleotide-shuffle null model,Prior Table S2 (rounded to 3 decimals)
-J2,1000,14089,642,575,0.6755579570068209,0.6351239333604226,Fixed principal labels,No dinucleotide-shuffle null model,Previously completed FCCC fixed-cohort diagnostic
-J2,2000,24333,642,575,0.6760882865079478,0.6365352837599891,Fixed principal labels,No dinucleotide-shuffle null model,Previously completed FCCC fixed-cohort diagnostic
-J2,5000,44210,642,575,0.6749107177542608,0.6344548286604361,Fixed principal labels,No dinucleotide-shuffle null model,Previously completed FCCC fixed-cohort diagnostic
+J2,1000,14089,642,575,0.658499901665879,0.6184152783421373,Radius-specific labels,No dinucleotide-shuffle null model,anchor_matched_user_verified_config
+J2,2000,24333,1018,1036,0.5982831201392794,0.6047496415865767,Radius-specific labels,No dinucleotide-shuffle null model,anchor_matched_user_verified_config
+J2,5000,44210,1737,1877,0.5802449397696432,0.6001977088955814,Radius-specific labels,No dinucleotide-shuffle null model,anchor_matched_user_verified_config
 Z22,1000,16,5,3,0.582,0.0,Radius-specific labels,No dinucleotide-shuffle null model,Prior Table S2 (rounded to 3 decimals)
 Z22,2000,39,11,8,0.536,0.006,Radius-specific labels,No dinucleotide-shuffle null model,Prior Table S2 (rounded to 3 decimals)
 Z22,5000,117,20,38,0.283,0.367,Radius-specific labels,No dinucleotide-shuffle null model,Prior Table S2 (rounded to 3 decimals)

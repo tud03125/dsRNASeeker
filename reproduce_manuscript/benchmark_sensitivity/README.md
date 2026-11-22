@@ -1,7 +1,7 @@
 # Benchmark sensitivity and statistical comparisons
 
 These materials support the November 2026 dsRNASeeker manuscript.
-The core software version remains v1.0.4.
+The original principal benchmark was produced for v1.0.4; later radius-sensitivity and execution-reliability revisions are archived here.
 
 ## Contents
 
@@ -50,8 +50,9 @@ supervised training or the original BLAST searches.
 The strictly inverted analysis evaluates existing scores and
 predictions without refitting the models.
 
-The J2 radius series uses the same 642 positive and 575 negative
-labels at each radius, with the no-shuffle scoring configuration.
+The J2 radius series uses the matched no-shuffle scoring
+configuration with radius-specific positive/negative labels:
+642/575 at 1 kb, 1018/1036 at 2 kb, and 1737/1877 at 5 kb.
 FLAG and Z22 radius-series values retain their reported precision.
 
 Historical source-path prefixes have been anonymized in public

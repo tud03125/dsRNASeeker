@@ -599,8 +599,8 @@ def benchmark_page():
         radius["score_source"] = radius["score_source"].replace({
             "Prior Table S2 (rounded to 3 decimals)":
                 "Radius-specific benchmark",
-            "Previously completed FCCC fixed-cohort diagnostic":
-                "Fixed-cohort benchmark",
+            "anchor_matched_user_verified_config":
+                "Radius-specific benchmark",
         })
 
         radius = radius.rename(
@@ -616,9 +616,9 @@ def benchmark_page():
         st.caption(
             "All radii were evaluated without the "
             "dinucleotide-shuffle null model. "
-            "FLAG-ZBP1 and Z22 use radius-specific labels, "
-            "whereas J2 uses the same 642 positive and "
-            "575 confident-negative pairs at all three radii."
+            "FLAG-ZBP1, J2 and Z22 use radius-specific "
+            "labeled cohorts. Table S2 reports their "
+            "radius-specific counts and performance."
         )
 
     with st.expander("Cross-study transfer"):
