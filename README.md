@@ -8,6 +8,8 @@
 
 Public HTTPS application: https://dsrnaseeker.streamlit.app/
 
+The public demonstration may sleep after inactivity; if prompted, click ‘Yes, get this app back up!’ to restart it.
+
 ## What dsRNASeeker integrates
 
 The end-to-end workflow can combine:
