@@ -1,0 +1,17 @@
+study,feature,n_changed,max_abs_change
+J2_244103,ADPS,14089,0.0568519837135814
+J2_244103,orientation_adps,0,0.0
+J2_244103,annotation_adps,0,0.0
+J2_244103,case_expression_adps,0,0.0
+J2_244103,energy_adps,14089,0.682754867863818
+J2_244103,interface_adps,14088,0.9750987768235267
+J2_244103,case_editing_adps,0,0.0
+J2_244103,RI_adps,0,0.0
+Z22_184962,ADPS,117,0.0013265803531734
+Z22_184962,orientation_adps,0,0.0
+Z22_184962,annotation_adps,0,0.0
+Z22_184962,case_expression_adps,0,0.0
+Z22_184962,energy_adps,117,0.33333333333333337
+Z22_184962,interface_adps,0,0.0
+Z22_184962,case_editing_adps,0,0.0
+Z22_184962,RI_adps,0,0.0

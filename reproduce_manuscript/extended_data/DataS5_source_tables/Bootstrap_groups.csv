@@ -1,0 +1,7 @@
+study,scheme,groups,positive_groups,negative_groups,requested,valid,largest_group_n
+FLAG_308489,connected_group,57,23,34,5000,5000,17
+FLAG_308489,group_id,62,28,34,5000,5000,17
+J2_244103,connected_group,633,295,351,5000,5000,44
+J2_244103,group_id,633,295,351,5000,5000,44
+Z22_184962,connected_group,20,5,15,5000,4984,15
+Z22_184962,group_id,35,19,16,5000,5000,9

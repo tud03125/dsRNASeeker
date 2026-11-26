@@ -1,0 +1,6 @@
+study_id	study_family	audit_table	original_summary	label_definition	analysis_variant	expected_positive	expected_negative	expected_groups
+FLAG_308489	FLAG_308489	inputs/FLAG_308489.tsv		FLAG_case_enriched_author_aligned	w1000_standardized	75	52	62
+J2_244103	J2_244103	inputs/J2_244103.tsv		J2_fixed_v5	w1000_standardized	642	575	633
+J2_220315	J2_220315	inputs/J2_220315.tsv		J2_GSE220315_frozen	frozen_august	65	39	104
+Z22_307540	Z22_307540	inputs/Z22_307540.tsv		Z22_case_enriched	w5000	18	14	18
+Z22_184962	Z22_184962	inputs/Z22_184962.tsv		Z22_case_enriched	w5000	28	38	42

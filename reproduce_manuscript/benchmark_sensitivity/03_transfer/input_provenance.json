@@ -1,0 +1,57 @@
+[
+  {
+    "study_id": "FLAG_308489",
+    "original_audit_sha256": "d2391204a84ecab78f0a634f78f8b94f629ab7b5ee4682c21896135e6f2a7cdf",
+    "original_summary_sha256": null,
+    "archived_input_sha256": "13f95ef1478c9045771b31c51482857cc7258bce24a684daaac265e179e7a273",
+    "archived_input": "inputs/FLAG_308489.tsv",
+    "candidate_universe": 878,
+    "positive": 75,
+    "negative": 52,
+    "groups": 62
+  },
+  {
+    "study_id": "J2_244103",
+    "original_audit_sha256": "ed90a1feee743a851bd8530a404f959427978234283d05ad5bfa7475345f09d0",
+    "original_summary_sha256": null,
+    "archived_input_sha256": "11f92454bf6fcc71ca543735aea33c9addf45aa8cdb63f2082b7a3211dc69049",
+    "archived_input": "inputs/J2_244103.tsv",
+    "candidate_universe": 14089,
+    "positive": 642,
+    "negative": 575,
+    "groups": 633
+  },
+  {
+    "study_id": "J2_220315",
+    "original_audit_sha256": "41506124f818bd06735bd817c854ba083b52b047ddff31e3e907829a3e39b802",
+    "original_summary_sha256": null,
+    "archived_input_sha256": "aeb67a56b83eb4b51e9ddb895c02fe302fafde8238254a70273ffbd92b0491c1",
+    "archived_input": "inputs/J2_220315.tsv",
+    "candidate_universe": 385,
+    "positive": 65,
+    "negative": 39,
+    "groups": 104
+  },
+  {
+    "study_id": "Z22_307540",
+    "original_audit_sha256": "a94064c6d027a18fda0b219c503ddb35d7b22969c0127ffe7e75cb2cd07c8aa8",
+    "original_summary_sha256": "b6bc5f5058271c0df90a8f0a800ad5e66767586f555957fac1b3ac1d3a07da81",
+    "archived_input_sha256": "3cee72ea790a3e3ebb08d00ec9af2f687a5b97fcb957eaa9893b23eea4f69e26",
+    "archived_input": "inputs/Z22_307540.tsv",
+    "candidate_universe": 182,
+    "positive": 18,
+    "negative": 14,
+    "groups": 18
+  },
+  {
+    "study_id": "Z22_184962",
+    "original_audit_sha256": "f33649e062be75978f593db587d7f120115cb5191ccc20c831057fbb43432845",
+    "original_summary_sha256": null,
+    "archived_input_sha256": "e1f9b398330759f23f8e6f84b22fed5d6c6ff4d1d056229db4c03a20ee29085b",
+    "archived_input": "inputs/Z22_184962.tsv",
+    "candidate_universe": 117,
+    "positive": 28,
+    "negative": 38,
+    "groups": 42
+  }
+]

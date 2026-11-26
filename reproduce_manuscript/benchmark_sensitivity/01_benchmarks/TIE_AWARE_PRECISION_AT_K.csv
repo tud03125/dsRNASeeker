@@ -22,7 +22,7 @@ FLAG_308489,genomic_inverted_only,case_expression_adps,20,0.6759259259259259,0.0
 J2_244103,all,ADPS,10,0.9,0.9,0.9
 J2_244103,all,ADPS,20,0.85,0.85,0.85
 J2_244103,all,Supervised,10,0.6,0.6,0.6
-J2_244103,all,Supervised,20,0.7,0.7,0.7
+J2_244103,all,Supervised,20,0.65,0.65,0.65
 J2_244103,all,EER,10,0.8235294117647058,0.0,1.0
 J2_244103,all,EER,20,0.8235294117647058,0.1,1.0
 J2_244103,all,dsRNAscan,10,0.7245179063360881,0.0,1.0
@@ -32,7 +32,7 @@ J2_244103,all,case_expression_adps,20,0.8640000000000001,0.8,1.0
 J2_244103,genomic_inverted_only,ADPS,10,0.9,0.9,0.9
 J2_244103,genomic_inverted_only,ADPS,20,0.85,0.85,0.85
 J2_244103,genomic_inverted_only,Supervised,10,0.6,0.6,0.6
-J2_244103,genomic_inverted_only,Supervised,20,0.7,0.7,0.7
+J2_244103,genomic_inverted_only,Supervised,20,0.65,0.65,0.65
 J2_244103,genomic_inverted_only,EER,10,0.8235294117647058,0.0,1.0
 J2_244103,genomic_inverted_only,EER,20,0.8235294117647058,0.1,1.0
 J2_244103,genomic_inverted_only,dsRNAscan,10,0.7237569060773481,0.0,1.0
@@ -42,7 +42,7 @@ J2_244103,genomic_inverted_only,case_expression_adps,20,0.8640000000000001,0.8,1
 Z22_184962,all,ADPS,10,0.0,0.0,0.0
 Z22_184962,all,ADPS,20,0.0,0.0,0.0
 Z22_184962,all,Supervised,10,1.0,1.0,1.0
-Z22_184962,all,Supervised,20,0.8,0.8,0.8
+Z22_184962,all,Supervised,20,0.85,0.85,0.85
 Z22_184962,all,EER,10,0.3448275862068965,0.0,1.0
 Z22_184962,all,EER,20,0.3448275862068965,0.0,1.0
 Z22_184962,all,dsRNAscan,10,0.279245283018868,0.1,0.6
@@ -52,7 +52,7 @@ Z22_184962,all,case_expression_adps,20,0.0,0.0,0.0
 Z22_184962,genomic_inverted_only,ADPS,10,0.0,0.0,0.0
 Z22_184962,genomic_inverted_only,ADPS,20,0.0,0.0,0.0
 Z22_184962,genomic_inverted_only,Supervised,10,0.2,0.2,0.2
-Z22_184962,genomic_inverted_only,Supervised,20,0.15,0.15,0.15
+Z22_184962,genomic_inverted_only,Supervised,20,0.1,0.1,0.1
 Z22_184962,genomic_inverted_only,EER,10,0.08108108108108109,0.0,0.3
 Z22_184962,genomic_inverted_only,EER,20,0.08108108108108109,0.0,0.15
 Z22_184962,genomic_inverted_only,dsRNAscan,10,0.05454545454545454,0.0,0.3

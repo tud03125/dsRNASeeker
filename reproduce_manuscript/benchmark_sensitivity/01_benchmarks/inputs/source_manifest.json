@@ -1,18 +1,11 @@
 [
   {
     "study": "FLAG_308489",
-    "principal_file": "historical_project_archive/dsRNASeeker_major_revision_20260925/reproducibility_gate_20261011_20261011T164319Z_1035537/manifests/FLAG_source_closeout_20261011T232313Z_1129594/Oxford_Figures_Tables_v104_SINGLE_FOLDER/08_LABEL_FREE_ROBUSTNESS_REVIEW/frozen_source_extract/dsRNASeeker_v1.0.4_manuscript_data/data/principal_audit/FLAG_308489__FLAG_verified_source_rebuilt.audit.tsv",
-    "principal_sha256": "d2391204a84ecab78f0a634f78f8b94f629ab7b5ee4682c21896135e6f2a7cdf",
-    "orientation_file": "historical_project_archive/dsRNASeeker_major_revision_20260925/reproducibility_gate_20261011_20261011T164319Z_1035537/manifests/FLAG_source_closeout_20261011T232313Z_1129594/Oxford_Figures_Tables_v104_SINGLE_FOLDER/08_LABEL_FREE_ROBUSTNESS_REVIEW/forensic_followup_20261030_1193337/FLAG_308489_orientation/candidate_impact_all.csv",
-    "orientation_sha256": "4dd0c689723bd891d243d0e9b5f00d5e3de9d93e8e41bc11d627b2bbde721626",
-    "comparator_file": "historical_work_archive/all_method_candidate_scores_original.tsv.gz",
-    "comparator_sha256": "7a670b61e77a32aa6266fc5d31d0261a085671ecf52b6b92065377e6f1831531",
-    "repository_module_sha256": "148971299f425a156128a5805f0fcef75863a7a3c1d7a54b0eb3fb32906dddd5",
-    "supervised_module_sha256": "ab519885d3746e56ee99ba870bccf9fb86cd68b05411e16b73d8b252fb380601",
-    "sklearn": "1.9.0",
-    "seed": 20260728,
-    "external_adps_max_delta": 0.005329957824939613,
-    "external_group_mismatch_labeled": 0,
+    "candidate_count": 878,
+    "positive": 75,
+    "negative": 52,
+    "input_file": "inputs/FLAG_308489.csv.gz",
+    "input_sha256": "de7559bc5a7fb510f04147e468d37dc8c72d0c77881281d4e5404b58076c5911",
     "principal_reproduced_metrics": [
       0.7901666148270705,
       0.7703846153846153,
@@ -22,56 +15,100 @@
       0.5164102564102564,
       0.5802301635372501,
       0.47269230769230774
-    ]
+    ],
+    "nullz_enabled": true,
+    "retained_FLAG_source": {
+      "study": "FLAG_308489",
+      "principal_file": "historical_project_archive/dsRNASeeker_major_revision_20260925/reproducibility_gate_20261011_20261011T164319Z_1035537/manifests/FLAG_source_closeout_20261011T232313Z_1129594/Oxford_Figures_Tables_v104_SINGLE_FOLDER/08_LABEL_FREE_ROBUSTNESS_REVIEW/frozen_source_extract/dsRNASeeker_v1.0.4_manuscript_data/data/principal_audit/FLAG_308489__FLAG_verified_source_rebuilt.audit.tsv",
+      "principal_sha256": "d2391204a84ecab78f0a634f78f8b94f629ab7b5ee4682c21896135e6f2a7cdf",
+      "orientation_file": "historical_project_archive/dsRNASeeker_major_revision_20260925/reproducibility_gate_20261011_20261011T164319Z_1035537/manifests/FLAG_source_closeout_20261011T232313Z_1129594/Oxford_Figures_Tables_v104_SINGLE_FOLDER/08_LABEL_FREE_ROBUSTNESS_REVIEW/forensic_followup_20261030_1193337/FLAG_308489_orientation/candidate_impact_all.csv",
+      "orientation_sha256": "4dd0c689723bd891d243d0e9b5f00d5e3de9d93e8e41bc11d627b2bbde721626",
+      "comparator_file": "historical_work_archive/all_method_candidate_scores_original.tsv.gz",
+      "comparator_sha256": "7a670b61e77a32aa6266fc5d31d0261a085671ecf52b6b92065377e6f1831531",
+      "repository_module_sha256": "148971299f425a156128a5805f0fcef75863a7a3c1d7a54b0eb3fb32906dddd5",
+      "supervised_module_sha256": "ab519885d3746e56ee99ba870bccf9fb86cd68b05411e16b73d8b252fb380601",
+      "sklearn": "1.9.0",
+      "seed": 20260728,
+      "external_adps_max_delta": 0.005329957824939613,
+      "external_group_mismatch_labeled": 0,
+      "principal_reproduced_metrics": [
+        0.7901666148270705,
+        0.7703846153846153,
+        0.7475578955957166,
+        0.7348717948717949,
+        0.6120034995625547,
+        0.5164102564102564,
+        0.5802301635372501,
+        0.47269230769230774
+      ]
+    }
   },
   {
     "study": "J2_244103",
-    "principal_file": "historical_project_archive/dsRNASeeker_major_revision_20260925/reproducibility_gate_20261011_20261011T164319Z_1035537/manifests/FLAG_source_closeout_20261011T232313Z_1129594/Oxford_Figures_Tables_v104_SINGLE_FOLDER/08_LABEL_FREE_ROBUSTNESS_REVIEW/frozen_source_extract/dsRNASeeker_v1.0.4_manuscript_data/data/principal_audit/J2_244103__GSE244103__w1000_standardized.audit.grouped.tsv",
-    "principal_sha256": "3ed486cacde889909cf52b6162cd3c3eb525252af8d1b7c6687abaaf1d2b0304",
-    "orientation_file": "historical_project_archive/dsRNASeeker_major_revision_20260925/reproducibility_gate_20261011_20261011T164319Z_1035537/manifests/FLAG_source_closeout_20261011T232313Z_1129594/Oxford_Figures_Tables_v104_SINGLE_FOLDER/08_LABEL_FREE_ROBUSTNESS_REVIEW/forensic_followup_20261030_1193337/J2_244103_orientation/candidate_impact_all.csv",
-    "orientation_sha256": "67f80f270623d9abcccacefe8bcf7f8e91f9b2ab48eccc6286d6af6be28f8aaf",
-    "comparator_file": "historical_work_archive/all_method_candidate_scores_original.tsv.gz",
-    "comparator_sha256": "7a670b61e77a32aa6266fc5d31d0261a085671ecf52b6b92065377e6f1831531",
-    "repository_module_sha256": "148971299f425a156128a5805f0fcef75863a7a3c1d7a54b0eb3fb32906dddd5",
-    "supervised_module_sha256": "ab519885d3746e56ee99ba870bccf9fb86cd68b05411e16b73d8b252fb380601",
-    "sklearn": "1.9.0",
-    "seed": 20260728,
-    "external_adps_max_delta": 0.0,
-    "external_group_mismatch_labeled": 1217,
+    "candidate_count": 14089,
+    "positive": 642,
+    "negative": 575,
+    "input_file": "inputs/J2_244103.csv.gz",
+    "input_sha256": "31acc292e1dd10b6b8a31d5c299fb77d8fa73799282318c0639652d2951b3fdf",
     "principal_reproduced_metrics": [
-      0.658499901665879,
-      0.6184152783421373,
-      0.6765231705969241,
-      0.6772992008668564,
+      0.6759852175707384,
+      0.6361506162806447,
+      0.7065420592306946,
+      0.7062413652986591,
       0.592635836276866,
       0.5783082757686578,
       0.6082255927820288,
       0.6178721386970067
-    ]
+    ],
+    "nullz_enabled": true,
+    "null_n": 50,
+    "original_summary_sha256": "1bb8f3c79c020734833353c8db6efe5876579dfdc82f1551b537e30a2ed48e6f",
+    "condition_nullz": {
+      "H446_sgDHX9": {
+        "sha256": "0859b79adfaafbdc6165a8b6028423252ab6407f7655298f9a5453b37b150c9e",
+        "n": 14089,
+        "N": 50
+      },
+      "H446_Scramble": {
+        "sha256": "0859b79adfaafbdc6165a8b6028423252ab6407f7655298f9a5453b37b150c9e",
+        "n": 14089,
+        "N": 50
+      }
+    },
+    "source_configuration": "full Null-Z, IntaRNA enabled; upstream evidence reused"
   },
   {
     "study": "Z22_184962",
-    "principal_file": "historical_project_archive/dsRNASeeker_major_revision_20260925/reproducibility_gate_20261011_20261011T164319Z_1035537/manifests/FLAG_source_closeout_20261011T232313Z_1129594/Oxford_Figures_Tables_v104_SINGLE_FOLDER/08_LABEL_FREE_ROBUSTNESS_REVIEW/frozen_source_extract/dsRNASeeker_v1.0.4_manuscript_data/data/principal_audit/Z22_184962_specific__GSE184962_4__w5000_expanded.audit.grouped.tsv",
-    "principal_sha256": "1c1f22400c1bc036a4787f69c1a1e84cf4973f195a019dfa63943d0a1f73acd0",
-    "orientation_file": "historical_project_archive/dsRNASeeker_major_revision_20260925/reproducibility_gate_20261011_20261011T164319Z_1035537/manifests/FLAG_source_closeout_20261011T232313Z_1129594/Oxford_Figures_Tables_v104_SINGLE_FOLDER/08_LABEL_FREE_ROBUSTNESS_REVIEW/forensic_followup_20261030_1193337/Z22_184962_orientation/candidate_impact_all.csv",
-    "orientation_sha256": "d8f4b850071b7897bc91ee6b414a6dae79d604737a98f6bc774f0ed44e11206d",
-    "comparator_file": "historical_work_archive/all_method_candidate_scores_original.tsv.gz",
-    "comparator_sha256": "7a670b61e77a32aa6266fc5d31d0261a085671ecf52b6b92065377e6f1831531",
-    "repository_module_sha256": "148971299f425a156128a5805f0fcef75863a7a3c1d7a54b0eb3fb32906dddd5",
-    "supervised_module_sha256": "ab519885d3746e56ee99ba870bccf9fb86cd68b05411e16b73d8b252fb380601",
-    "sklearn": "1.9.0",
-    "seed": 20260728,
-    "external_adps_max_delta": 0.0,
-    "external_group_mismatch_labeled": 0,
+    "candidate_count": 117,
+    "positive": 20,
+    "negative": 38,
+    "input_file": "inputs/Z22_184962.csv.gz",
+    "input_sha256": "b26fceaeeb75aedc2ed68395dd07a47498e5e1e49ec634b7a99fa7ad51e9d0e4",
     "principal_reproduced_metrics": [
-      0.28271765454689024,
-      0.3671052631578947,
-      0.9295101590749858,
-      0.9447368421052631,
+      0.3586054262841478,
+      0.36907894736842106,
+      0.9404655695611579,
+      0.9513157894736841,
       0.3448275862068966,
       0.5,
       0.3375862068965517,
       0.4723684210526316
-    ]
+    ],
+    "nullz_enabled": true,
+    "null_n": 50,
+    "original_summary_sha256": "7ef99fd2fdb8d5dd6fa4d0ef619287415773b87c1bb3434330afb7154cde8c7a",
+    "condition_nullz": {
+      "IFNb_48h": {
+        "sha256": "8fabeff980ded61a699c58b1f4d1e927ad21484369319ad1241bdfe5a37127c1",
+        "n": 117,
+        "N": 50
+      },
+      "IFNb_0h": {
+        "sha256": "8fabeff980ded61a699c58b1f4d1e927ad21484369319ad1241bdfe5a37127c1",
+        "n": 117,
+        "N": 50
+      }
+    },
+    "source_configuration": "full Null-Z, IntaRNA enabled; upstream evidence reused"
   }
 ]

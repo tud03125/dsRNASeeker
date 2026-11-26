@@ -1,12 +1,14 @@
 {
-  "source_manifest_sha256": "a639e1ee34704b2b65bcfbaa3435bc230db6c00fe5eb9e0a66251e8d942408c5",
-  "prediction_file_sha256": "24a91edeea2ca095c9a2b3a30657a851c727de9e8b28c5520901c4dfaac2f6bd",
+  "source_manifest_sha256": "6fe5919c355fe07db8bcd742ad4a39824be83b40b1625120d10bbc719b7e064b",
+  "prediction_file_sha256": "f34edc70af78387df1fe84020fdc6a0efa99f99d0ceff6ecbbdb409c8190434e",
   "n_directed": 20,
   "n_evaluable_after_screen": 20,
-  "blast_executed": true,
+  "blast_executed": false,
   "arm_status_counts": {
     "OK": 3088,
     "SHORT_ARM_EXACT_ONLY": 4
   },
-  "definition": "Either test arm exact (including reverse complement) or one BLAST HSP >=90% identity and >=80% coverage of both arm sequences. Missing source sequences block clearance. Short test arms remain unresolved unless matched. Short source arms do not block a long target where 90% identity and 80% target coverage are mathematically impossible by length (0.72*target length > short length). Fixed archived predictions, no retraining. Heuristic screen, not proof of absence of all homology."
+  "definition": "Either test arm exact (including reverse complement) or one BLAST HSP >=90% identity and >=80% coverage of both arm sequences. Missing source sequences block clearance. Short test arms remain unresolved unless matched. Short source arms do not block a long target where 90% identity and 80% target coverage are mathematically impossible by length (0.72*target length > short length). Fixed archived predictions, no retraining. Heuristic screen, not proof of absence of all homology.",
+  "sequence_screen_reused": true,
+  "sequence_screen_note": "Existing BLAST and exact-match assignments reused after reference-arm and pair-ID checks; original search files retained."
 }

@@ -12,15 +12,15 @@
     "assay": "Z22",
     "supervised_diagnostic_radius": "5 kb",
     "labels": "20 positive / 38 confident-negative",
-    "adps_ap": 0.282718,
-    "adps_auc": 0.367105
+    "adps_ap": 0.358605,
+    "adps_auc": 0.369079
   },
   {
     "study": "GSE244103",
     "assay": "J2",
     "primary_radius": "1 kb",
     "labels": "642 positive / 575 confident-negative",
-    "adps_ap": 0.6585,
-    "adps_auc": 0.618415
+    "adps_ap": 0.675985,
+    "adps_auc": 0.636151
   }
 ]

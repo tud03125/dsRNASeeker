@@ -1,7 +1,7 @@
 {
-  "source_file": "historical_project_archive/dsRNASeeker_major_revision_20260925/reproducibility_gate_20261011_20261011T164319Z_1035537/manifests/FLAG_source_closeout_20261011T232313Z_1129594/Oxford_Figures_Tables_v104_SINGLE_FOLDER/08_LABEL_FREE_ROBUSTNESS_REVIEW/frozen_source_extract/dsRNASeeker_v1.0.4_manuscript_data/data/principal_audit/Z22_184962_specific__GSE184962_4__w5000_expanded.audit.grouped.tsv",
-  "source_sha256": "1c1f22400c1bc036a4787f69c1a1e84cf4973f195a019dfa63943d0a1f73acd0",
-  "repo": "historical_work_archive/dsRNASeeker_2",
+  "source_file": "../01_benchmarks/inputs/Z22_184962.csv.gz",
+  "source_sha256": "b26fceaeeb75aedc2ed68395dd07a47498e5e1e49ec634b7a99fa7ad51e9d0e4",
+  "repo": "dsRNASeeker",
   "sklearn_version": "1.9.0",
   "seed": 20260728,
   "frozen_total_candidates": 117,
@@ -16,10 +16,10 @@
   "largest_component_labeled_n": 15,
   "largest_component_positive_n": 15,
   "original_cv_method": "StratifiedGroupKFold",
-  "original_fixed_l2_ap": 0.9295101590749858,
-  "original_fixed_l2_roc_auc": 0.9447368421052631,
+  "original_fixed_l2_ap": 0.9404655695611579,
+  "original_fixed_l2_roc_auc": 0.9513157894736841,
   "shared_locus_cv_method": "StratifiedGroupKFold",
-  "shared_locus_fixed_l2_ap": 0.9188592643310136,
-  "shared_locus_fixed_l2_roc_auc": 0.9434210526315789,
+  "shared_locus_fixed_l2_ap": 0.9276088522044406,
+  "shared_locus_fixed_l2_roc_auc": 0.9486842105263158,
   "interpretation": "Exploratory in-study fold sensitivity on frozen labels, NOT an independent experimental test"
 }
