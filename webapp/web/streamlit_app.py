@@ -1,5 +1,6 @@
 from __future__ import annotations
 import sys
+import hashlib
 from pathlib import Path
 import pandas as pd
 import streamlit as st
@@ -171,9 +172,9 @@ BASE = (
 
 GITHUB = "https://github.com/tud03125/dsRNASeeker"
 
-SOFTWARE_DOI = "https://doi.org/10.5281/zenodo.23407322"
+SOFTWARE_DOI = "https://doi.org/10.5281/zenodo.24547524"
 
-DATA_DOI = "https://doi.org/10.5281/zenodo.24296933"
+DATA_DOI = SOFTWARE_DOI
 
 WEBSITE = "https://dsrnaseeker.streamlit.app/"
 
@@ -206,7 +207,6 @@ STUDIES = {
     "Z22_184962": "Z22 (diagnostic)",
 }
 
-@st.cache_data
 def load_table(relative_path):
     return pd.read_csv(BASE / relative_path)
 
@@ -498,6 +498,26 @@ def benchmark_page():
         "ALL_CHANNELS_AND_STRICT_SUBSET.csv"
     )
 
+    benchmark_file = (
+        BASE / "01_benchmarks"
+        / "ALL_CHANNELS_AND_STRICT_SUBSET.csv"
+    )
+
+    fingerprint = hashlib.sha256(
+        benchmark_file.read_bytes()
+    ).hexdigest()
+
+    st.caption(
+        "Manuscript benchmark release: v1.0.6 | "
+        f"Data SHA-256: {fingerprint[:16]}"
+    )
+
+    st.caption(
+        "The principal benchmarks incorporate Null-Z. "
+        "The separate search-radius sensitivity analyses "
+        "omit Null-Z."
+    )
+
     subset = st.radio(
         "Candidate subset",
         ["All labeled candidates",
@@ -681,7 +701,7 @@ def documentation_page():
 The standalone pipeline accepts FASTQ or BAM input.
 
 - [Installation and usage instructions]({GITHUB})
-- [Archived software v1.0.4]({SOFTWARE_DOI})
+- [Archived software v1.0.6]({SOFTWARE_DOI})
 - [Manuscript reproduction instructions]({GITHUB}/tree/main/reproduce_manuscript)
 - [Benchmark and reproduction data]({DATA_DOI})
 
@@ -716,43 +736,39 @@ of physical dsRNA formation.
 def citation_page():
     st.header("Cite dsRNASeeker")
 
-    st.subheader("Software")
+    st.subheader("Software and reproducibility materials")
 
     st.markdown(
-        "dsRNASeeker v1.0.4 — Reproducibility "
-        "and Cross-Study Benchmarking Update."
-    )
-
-    st.markdown(
-        f"[DOI: 10.5281/zenodo.23407322]({SOFTWARE_DOI})"
-    )
-
-    st.subheader("Benchmark and reproduction data")
-
-    st.write(
-        "Levin, M. (2026). dsRNASeeker v1.0.4: "
-        "Benchmarking and Manuscript Reproduction Data. "
-        "Zenodo."
+        "dsRNASeeker v1.0.6 — Manuscript Benchmark Update."
     )
 
     st.markdown(
-        f"[DOI: 10.5281/zenodo.24296933]({DATA_DOI})"
+        f"[DOI: 10.5281/zenodo.24547524]({SOFTWARE_DOI})"
     )
 
-    st.markdown(f"[Source code and documentation]({GITHUB})")
+    st.markdown(
+        f"[Versioned source code]({GITHUB}/tree/v1.0.6)"
+    )
+
+    st.markdown(
+        f"[Manuscript benchmark data and reproduction scripts]"
+        f"({GITHUB}/tree/v1.0.6/reproduce_manuscript)"
+    )
 
     st.caption(
-        "The November web-interface update is maintained "
-        "in GitHub. The original software DOI identifies "
-        "the frozen v1.0.4 software release."
+        "The archived v1.0.6 release contains the software, "
+        "benchmark results and manuscript reproducibility "
+        "materials. The interactive website is maintained "
+        "separately."
     )
+
 
 
 st.title("dsRNASeeker")
 
 st.caption(
     "Double-stranded RNA candidate prioritization "
-    "| Core software v1.0.4"
+    "| Manuscript release v1.0.6"
 )
 
 with st.sidebar:
